@@ -1,0 +1,46 @@
+{
+    "name": "@stembord/state-react",
+    "version": "0.1.0",
+    "description": "connect react components with state stores",
+    "repository": {
+        "type": "git",
+        "url": "https://gitlab.com/stembord/ts-state-react.git"
+    },
+    "main": "./src/index.js",
+    "types": "./src/index.d.ts",
+    "module": "./lib/index.ts",
+    "scripts": {
+        "build": "tsc",
+        "prepublishOnly": "npm run clean && npm run build",
+        "test": "ts-node ./node_modules/tape/bin/tape ./tests/**/*.test.{ts,tsx} | tap-spec",
+        "clean": "npm run clean_build",
+        "clean_build": "rm -rf ./src"
+    },
+    "keywords": [
+        "state",
+        "react"
+    ],
+    "author": "Nathan Faucett",
+    "license": "(MIT OR Apache-2.0)",
+    "readmeFilename": "README.md",
+    "devDependencies": {
+        "@stembord/state": "file:../ts-state",
+        "@types/enzyme": "^3.1.13",
+        "@types/enzyme-adapter-react-16": "^1.0.3",
+        "@types/jsdom": "^11.0.6",
+        "@types/react": "^16.4.9",
+        "@types/tape": "^4.2.32",
+        "enzyme": "^3.4.1",
+        "enzyme-adapter-react-16": "^1.2.0",
+        "jsdom": "^11.12.0",
+        "react": "^16.4.2",
+        "react-dom": "^16.4.2",
+        "tap-spec": "^5.0.0",
+        "tape": "^4.9.1",
+        "ts-node": "^7.0.0",
+        "typescript": "^3.0.1"
+    },
+    "peerDependencies": {
+        "react": ">= 16.4.2"
+    }
+}
