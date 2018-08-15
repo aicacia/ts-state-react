@@ -20,11 +20,11 @@ let RENDER_CALLED = 0;
 
 Enzyme.configure({ adapter: new EnzymeAdapter() });
 
-interface TextProps {
+interface ITextProps {
     text: String;
 }
 
-class Text extends React.PureComponent<TextProps> {
+class Text extends React.PureComponent<ITextProps> {
     render() {
         RENDER_CALLED += 1;
         return <p>{this.props.text}</p>;
@@ -35,15 +35,15 @@ const ConnectedText = connect(({ form: { text } }) => ({
     text
 }))(Text);
 
-interface FormProps {
+interface IFormProps {
     text: string;
     onChange(text: string): void;
 }
 
-class Form extends React.PureComponent<FormProps> {
+class Form extends React.PureComponent<IFormProps> {
     inputRef: any;
 
-    constructor(props: FormProps) {
+    constructor(props: IFormProps) {
         super(props);
 
         this.inputRef = React.createRef();
@@ -74,11 +74,11 @@ var ConnectedForm = connect(({ form: { text } }) => ({
     onChange
 }))(Form);
 
-interface RootState {
+interface IRootState {
     value: { [key: string]: any };
 }
 
-class Root extends React.PureComponent<{}, RootState> {
+class Root extends React.Component<{}, IRootState> {
     textRef: React.RefObject<any>;
     formRef: React.RefObject<any>;
 
