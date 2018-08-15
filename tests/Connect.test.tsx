@@ -92,10 +92,8 @@ class Root extends React.PureComponent<{}, RootState> {
             value: state.getState()
         };
 
-        state.on("set-state", state => {
-            this.setState({
-                value: state
-            });
+        state.on("set-state", value => {
+            this.setState({ value });
         });
     }
 

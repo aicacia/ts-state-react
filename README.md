@@ -108,12 +108,18 @@ export class Root extends React.PureComponent<{}, RootState> {
             value: state.getState()
         });
 
-        state.on("set-state", () => {
-            this.setState({
-                value: state.getState()
-            });
+        state.on("set-state", value => {
+            this.setState({ value });
         });
     }
+
+    componentDidMount() {
+        this._isMounted = true;
+    }
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
+
     render() {
         return (
             <Provider value={this.state.value}>
