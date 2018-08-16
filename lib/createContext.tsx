@@ -8,40 +8,42 @@ export type IMapFn<IP = {}, OP = {}> = (
 export function createContext<S>(state: S) {
     const { Provider, Consumer } = React.createContext(state);
 
-    function connect<IP, OP>(map: IMapFn<IP, OP>) {
-        return function<OS = {}>(
-            Component: React.ComponentClass<OP, OS>
-        ): React.ComponentClass<IP, {}> {
-            class Connect extends React.Component<IP, {}> {
-                static displayName = `Connect(${Component.displayName ||
-                    Component.name ||
-                    "Component"})`;
+    const connect = <IP, OP>(map: IMapFn<IP, OP>) => (
+        Component: React.ComponentClass<IP & OP>
+    ): React.ComponentClass<IP> => {
+        class Connect extends React.Component<IP> {
+            static displayName = `Connect(${Component.displayName ||
+                Component.name ||
+                "Component"})`;
 
-                componentRef: React.RefObject<React.Component>;
+            componentRef: React.RefObject<React.Component>;
 
-                constructor(props: IP) {
-                    super(props);
+            constructor(props: IP) {
+                super(props);
 
-                    this.componentRef = React.createRef();
-                }
-
-                render() {
-                    return (
-                        <Consumer>
-                            {state => (
-                                <Component
-                                    ref={this.componentRef}
-                                    {...map(state, this.props)}
-                                />
-                            )}
-                        </Consumer>
-                    );
-                }
+                this.componentRef = React.createRef();
             }
 
-            return Connect;
-        };
-    }
+            render() {
+                const props = this.props,
+                    ComponentCast: any = Component;
+
+                return (
+                    <Consumer>
+                        {state => (
+                            <ComponentCast
+                                ref={this.componentRef}
+                                {...props}
+                                {...map(state, props)}
+                            />
+                        )}
+                    </Consumer>
+                );
+            }
+        }
+
+        return Connect;
+    };
 
     return { connect, Provider };
 }
