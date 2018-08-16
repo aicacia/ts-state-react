@@ -18,20 +18,26 @@ export const { Provider, connect } = createContext(state.getState());
 ```ts
 // ./src/stores/todos.ts
 import { state } from "../state";
+import { IState } from "@stembord/state";
 
 let ID = 0;
 
-export interface ITodos {
-    list: [];
+export interface ITodo {
+    id: number;
+    text: string;
 }
 
-export const store = state.createStore("todos", {
+export interface ITodos {
+    list: Array<ITodo>;
+}
+
+export const store = state.createStore<ITodos>("todos", {
     list: []
 });
 
-export const selectTodos = ({ list }: TodoState) => list;
-export const selectTodoById = ({ list }: TodoState, id: number) =>
-    list.find(todo => todo.id === id);
+export const selectAll = ({ todos: { list } }: IState) => list;
+export const selectById = ({ todos: { list } }: IState, id: number) =>
+    list.find((todo: ITodo) => todo.id === id);
 
 export const create = (text: string) => {
     const id = ID++;
@@ -63,32 +69,32 @@ export const remove = (id: number) => {
 };
 ```
 
-```ts
+````ts
 // ./src/stores/todoListForm.ts
 import { state } from "../state";
+import { IState } from "@stembord/state";
 
 export interface ITodoListForm {
-    list: [];
+    text: string;
 }
 
-export const store = state.createStore("todoListForm", {
+export const store = state.createStore<ITodoListForm>("todoListForm", {
     text: ""
 });
 
-export const selectText = ({ text }: ITodoListForm) => text;
+export const selectText = ({ todoListForm: { text } }: IState) => text;
 
-export const change = (text: string) => {
+export const changeText = (text: string) => {
     store.updateState(() => ({ text }));
-};
-```
+};```
 
 ## Root Component
 
 ```tsx
 // ./src/components/Root/Root.tsx
-import React from "react";
-import PropTypes from "prop-types";
-import { IState, Provider, state } from "../state";
+import * as React from "react";
+import { IState } from "@stembord/state";
+import { Provider, state } from "../../state";
 import { TodoList } from "../TodoList";
 
 interface IRootState {
@@ -96,17 +102,44 @@ interface IRootState {
 }
 
 export class Root extends React.PureComponent<{}, IRootState> {
-    constructor(props) {
+    private _isUpdating: boolean;
+    private _isMounted: boolean;
+    private _onSetState: () => void;
+    private _runSetState: () => void;
+
+    constructor(props: {}) {
         super(props);
 
-        this.setState({
-            value: state.getState()
-        });
+        this._isUpdating = false;
+        this._isMounted = false;
 
-        // you could debounce on updates here
-        state.on("set-state", value => {
-            this.setState({ value });
-        });
+        this.state = {
+            value: state.getState()
+        };
+
+        this._onSetState = () => {
+            if (!this._isUpdating) {
+                this._isUpdating = true;
+                process.nextTick(this._runSetState);
+            }
+        };
+
+        this._runSetState = () => {
+            this._isUpdating = false;
+            if (this._isMounted) {
+                this.setState({ value: state.getState() });
+            }
+        };
+    }
+
+    componentDidMount() {
+        this._isMounted = true;
+        state.addListener("set-state", this._onSetState);
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
+        state.removeListener("set-state", this._onSetState);
     }
 
     render() {
@@ -117,23 +150,28 @@ export class Root extends React.PureComponent<{}, IRootState> {
         );
     }
 }
-```
+````
 
 ## Components
 
 ```tsx
 // ./src/components/TodoList/TodoList.tsx
-import React from "react";
-import PropTypes from "prop-types";
+import * as React from "react";
+import { ITodo } from "../../stores/todos";
+import { Todo } from "./Todo";
 
 interface ITodoListProps {
-    text: string,
-    list: [],
-    createTodo: (string) => void,
-    changeText: (string) => void
+    text: string;
+    list: Array<ITodo>;
+    createTodo: (text: string) => void;
+    changeText: (text: string) => void;
+    removeTodo: (id: number) => void;
 }
 
 export class TodoList extends React.PureComponent<ITodoListProps> {
+    onSubmit: (e: any) => void;
+    onChange: (e: any) => void;
+
     constructor(props: ITodoListProps) {
         super(props);
 
@@ -147,23 +185,29 @@ export class TodoList extends React.PureComponent<ITodoListProps> {
         };
 
         this.onChange = e => {
-            this.props.changeText(text: e.target.value);
+            this.props.changeText(e.target.value);
         };
     }
     render() {
-        const { text, list } = this.props;
+        const { text, list, removeTodo } = this.props;
 
         return (
-            <div class="TodoList">
+            <div>
                 <form onSubmit={this.onSubmit}>
-                    <input
-                        value={text}
-                        onChange={this.onChange}
-                    />
+                    <input value={text} onChange={this.onChange} />
                 </form>
-                {list.map(todo => (
-                    <p key={todo.id}>{todo.text}</p>
-                ))}
+                <ul>
+                    {list.map(todo => (
+                        <Todo
+                            key={todo.id}
+                            id={todo.id}
+                            text={todo.text}
+                            onRemove={removeTodo}
+                        >
+                            {todo.text}
+                        </Todo>
+                    ))}
+                </ul>
             </div>
         );
     }
@@ -174,16 +218,16 @@ export class TodoList extends React.PureComponent<ITodoListProps> {
 
 ```typescript
 // ./src/components/TodoList/TodoListContainer.ts
-import { connect } from "../state";
-import { todoListForm, todos } from "../stores";
+import { connect } from "../../state";
+import { todos, todoListForm } from "../../stores";
 import { TodoList } from "./TodoList";
+import { IState } from "@stembord/state";
 
-export connect(
-    (state) => ({
-        text: todoListForm.selectText(state.todoListForm),
-        list: todos.selectTodos(state.todos),
-        createTodo: todos.create,
-        changeText: text => todoListForm.change({ text })
-    })
-)(TodoList);
+export const TodoListContainer = connect((state: IState) => ({
+    text: todoListForm.selectText(state),
+    list: todos.selectAll(state),
+    createTodo: todos.create,
+    removeTodo: todos.remove,
+    changeText: todoListForm.changeText
+}))(TodoList);
 ```
