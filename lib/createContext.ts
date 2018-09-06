@@ -25,20 +25,17 @@ export function createContext<S>(state: S) {
             }
 
             render() {
-                const props = this.props,
+                const props: IP = this.props,
                     ComponentCast: any = Component;
 
-                return (
-                    <Consumer>
-                        {state => (
-                            <ComponentCast
-                                ref={this.componentRef}
-                                {...props}
-                                {...map(state, props)}
-                            />
-                        )}
-                    </Consumer>
-                );
+                return React.createElement(Consumer, {
+                    children: (state: { [key: string]: any }) =>
+                        React.createElement(ComponentCast, {
+                            ref: this.componentRef,
+                            ...(<{}>props),
+                            ...(<{}>map(state, props))
+                        })
+                });
             }
         }
 

@@ -1,6 +1,6 @@
 {
     "name": "@stembord/state-react",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "connect react components with state stores",
     "repository": {
         "type": "git",
