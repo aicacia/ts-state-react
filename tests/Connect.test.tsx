@@ -21,19 +21,32 @@ let RENDER_CALLED = 0;
 Enzyme.configure({ adapter: new EnzymeAdapter() });
 
 interface ITextProps {
-    text: String;
+    text: string;
+    symbol: string;
 }
 
 class Text extends React.PureComponent<ITextProps> {
     render() {
+        const { text, symbol } = this.props;
         RENDER_CALLED += 1;
-        return <p>{this.props.text}</p>;
+        return (
+            <p>
+                {text}
+                {symbol}
+            </p>
+        );
     }
 }
 
-const ConnectedText = connect(({ form: { text } }) => ({
-    text
-}))(Text);
+interface IConnectedTextProp {
+    symbol: string;
+}
+
+const ConnectedText = connect<ITextProps, IConnectedTextProp>(
+    ({ form: { text } }) => ({
+        text
+    })
+)(Text);
 
 interface IFormProps {
     text: string;
@@ -100,7 +113,7 @@ class Root extends React.Component<{}, IRootState> {
     render() {
         return (
             <Provider value={this.state.value}>
-                <ConnectedText ref={this.textRef} key="text" />
+                <ConnectedText ref={this.textRef} key="text" symbol="!" />
                 <ConnectedForm ref={this.formRef} key="form" />
             </Provider>
         );
