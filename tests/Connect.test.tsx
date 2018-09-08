@@ -38,15 +38,9 @@ class Text extends React.PureComponent<ITextProps> {
     }
 }
 
-interface IConnectedTextProp {
-    symbol: string;
-}
-
-const ConnectedText = connect<ITextProps, IConnectedTextProp>(
-    ({ form: { text } }) => ({
-        text
-    })
-)(Text);
+const ConnectedText = connect(({ form: { text } }) => ({
+    text
+}))(Text);
 
 interface IFormProps {
     text: string;
