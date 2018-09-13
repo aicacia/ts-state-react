@@ -1,6 +1,6 @@
 {
     "name": "@stembord/state-react",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "description": "connect react components with state stores",
     "repository": {
         "type": "git",
@@ -24,7 +24,7 @@
     "license": "(MIT OR Apache-2.0)",
     "readmeFilename": "README.md",
     "devDependencies": {
-        "@stembord/state": "^0.1.0",
+        "@stembord/state": "^0.1.1",
         "@types/enzyme": "^3.1.13",
         "@types/enzyme-adapter-react-16": "^1.0.3",
         "@types/jsdom": "^11.0.6",

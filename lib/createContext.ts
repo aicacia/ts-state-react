@@ -2,7 +2,7 @@ import * as React from "react";
 
 export type IOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-type IShared<
+export type IShared<
     InjectedProps,
     DecorationTargetProps extends IShared<InjectedProps, DecorationTargetProps>
 > = {
@@ -14,8 +14,8 @@ type IShared<
         : never
 };
 
-export interface IMapStateToProps<TStateProps, TOwnProps, State> {
-    (state: State, ownProps: TOwnProps): TStateProps;
+export interface IMapStateToProps<TState, TStateProps, TOwnProps> {
+    (state: TState, ownProps: TOwnProps): TStateProps;
 }
 
 export interface IInferableComponentEnhancerWithProps<
@@ -29,11 +29,29 @@ export interface IInferableComponentEnhancerWithProps<
     > & { WrappedComponent: React.ComponentType<P> };
 }
 
-export const createContext = <TState>(state: TState) => {
+export type IProvider<TState> = React.ComponentType<
+    React.ProviderProps<TState>
+>;
+
+export type IConnect<TState> = <TStateProps = {}, TOwnProps = {}>(
+    mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>
+) => <P extends IShared<TStateProps, P>>(
+    Component: React.ComponentType<P>
+) => React.ComponentClass<
+    Pick<P, Exclude<keyof P, Extract<keyof TStateProps, keyof P>>> & TOwnProps,
+    any
+> & {};
+
+export interface IContext<TState> {
+    connect: IConnect<TState>;
+    Provider: IProvider<TState>;
+}
+
+export const createContext = <TState>(state: TState): IContext<TState> => {
     const { Provider, Consumer } = React.createContext(state);
 
     const connect = <TStateProps = {}, TOwnProps = {}>(
-        mapStateToProps: IMapStateToProps<TStateProps, TOwnProps, TState>
+        mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>
     ) => <P extends IShared<TStateProps, P>>(
         Component: React.ComponentType<P>
     ): React.ComponentClass<
