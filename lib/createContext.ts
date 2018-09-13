@@ -40,7 +40,7 @@ export type IConnect<TState> = <TStateProps = {}, TOwnProps = {}>(
 ) => React.ComponentClass<
     Pick<P, Exclude<keyof P, Extract<keyof TStateProps, keyof P>>> & TOwnProps,
     any
-> & {};
+> & { WrappedComponent: React.ComponentType<P> };
 
 export interface IContext<TState> {
     connect: IConnect<TState>;
@@ -62,7 +62,7 @@ export const createContext = <TState>(state: TState): IContext<TState> => {
                 Component.name ||
                 "Component"})`;
 
-            componentRef: React.RefObject<React.Component>;
+            componentRef: React.RefObject<React.ComponentType<P>>;
 
             constructor(props: TOwnProps) {
                 super(props);
