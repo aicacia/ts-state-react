@@ -33,6 +33,10 @@ export type IProvider<TState> = React.ComponentType<
     React.ProviderProps<TState>
 >;
 
+export type IConsumer<TState> = React.ComponentType<
+    React.ConsumerProps<TState>
+>;
+
 export type IConnect<TState> = <TStateProps = {}, TOwnProps = {}>(
     mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>
 ) => <P extends IShared<TStateProps, P>>(
@@ -45,6 +49,7 @@ export type IConnect<TState> = <TStateProps = {}, TOwnProps = {}>(
 export interface IContext<TState> {
     connect: IConnect<TState>;
     Provider: IProvider<TState>;
+    Consumer: IConsumer<TState>;
 }
 
 export const createContext = <TState>(state: TState): IContext<TState> => {
@@ -87,5 +92,5 @@ export const createContext = <TState>(state: TState): IContext<TState> => {
         return Connect as any;
     };
 
-    return { connect, Provider };
+    return { connect, Provider, Consumer };
 };
