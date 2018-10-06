@@ -11,8 +11,8 @@ const dom = new JSDOM("<!doctype html><html><body></body></html>");
 (global as any).document = dom.window.document;
 (global as any).window = dom.window;
 
-const state = new State(),
-    formStore = state.createStore("form", { text: "" });
+const state = new State({ form: { text: "" } }),
+    formStore = state.getStore("form");
 
 const { connect, Provider } = createContext(state.getState());
 
@@ -82,7 +82,7 @@ var ConnectedForm = connect(({ form: { text } }) => ({
 }))(Form);
 
 interface IRootState {
-    value: { [key: string]: any };
+    value: typeof state.current;
 }
 
 class Root extends React.Component<{}, IRootState> {
