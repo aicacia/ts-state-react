@@ -14,7 +14,11 @@ const dom = new JSDOM("<!doctype html><html><body></body></html>");
 const state = new State({ form: { text: "" } }),
     formStore = state.getStore("form");
 
+type IState = typeof state.current;
+
 const { connect, Provider } = createContext(state.getState());
+
+const selectText = ({ form }: IState) => form.text;
 
 let RENDER_CALLED = 0;
 
@@ -38,13 +42,13 @@ class Text extends React.PureComponent<ITextProps> {
     }
 }
 
-const ConnectedText = connect(({ form: { text } }) => ({
-    text
+const ConnectedText = connect((state: IState) => ({
+    text: selectText(state)
 }))(Text);
 
 interface IFormProps {
     text: string;
-    onChange(text: string): void;
+    onChange(e: React.ChangeEvent<HTMLInputElement>): void;
 }
 
 class Form extends React.PureComponent<IFormProps> {
@@ -63,7 +67,7 @@ class Form extends React.PureComponent<IFormProps> {
 
         return (
             <input
-                onChange={e => onChange((e.target as HTMLInputElement).value)}
+                onChange={onChange}
                 type="text"
                 ref={this.inputRef}
                 value={text}
@@ -72,8 +76,8 @@ class Form extends React.PureComponent<IFormProps> {
     }
 }
 
-const onChange = (text: string) => {
-    formStore.setState({ text });
+const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    formStore.setState({ text: e.target.value });
 };
 
 var ConnectedForm = connect(({ form: { text } }) => ({
@@ -82,7 +86,7 @@ var ConnectedForm = connect(({ form: { text } }) => ({
 }))(Form);
 
 interface IRootState {
-    value: typeof state.current;
+    value: IState;
 }
 
 class Root extends React.Component<{}, IRootState> {

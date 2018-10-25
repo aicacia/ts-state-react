@@ -73,18 +73,22 @@ export const createContext = <TState>(state: TState): IContext<TState> => {
                 super(props);
 
                 this.componentRef = React.createRef();
+                this.consumerRender = this.consumerRender.bind(this);
+            }
+
+            consumerRender(state: TState) {
+                const props = this.props;
+
+                return React.createElement(Component as any, {
+                    ref: this.componentRef,
+                    ...(props as {}),
+                    ...(mapStateToProps(state, props) as {})
+                });
             }
 
             render() {
-                const props = this.props;
-
                 return React.createElement(Consumer, {
-                    children: (state: TState) =>
-                        React.createElement(Component as any, {
-                            ref: this.componentRef,
-                            ...(props as {}),
-                            ...(mapStateToProps(state, props) as {})
-                        })
+                    children: this.consumerRender
                 });
             }
         };
