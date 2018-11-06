@@ -225,11 +225,15 @@ import { connect, IState } from "../../state";
 import { todos, todoListForm } from "../../stores";
 import { TodoList } from "./TodoList";
 
-export const TodoListContainer = connect((state: IState) => ({
-    text: todoListForm.selectText(state),
-    list: todos.selectAll(state),
-    createTodo: todos.create,
-    removeTodo: todos.remove,
-    changeText: todoListForm.changeText
-}))(TodoList);
+export const TodoListContainer = connect(
+    (state: IState) => ({
+        text: todoListForm.selectText(state),
+        list: todos.selectAll(state)
+    }),
+    () => ({
+        createTodo: todos.create,
+        removeTodo: todos.remove,
+        changeText: todoListForm.changeText
+    })
+)(TodoList);
 ```
