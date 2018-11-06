@@ -43,14 +43,15 @@ class Intermediate<StateProps, FunctionProps> extends React.Component<
             componentRef,
             stateProps,
             functionProps,
-            Component
+            Component,
+            children
         } = this.props;
 
         return React.createElement(Component as any, {
             ref: componentRef,
             ...(stateProps || {}),
             ...(functionProps || {})
-        });
+        }, children);
     }
 }
 
@@ -100,7 +101,7 @@ export const createContext = <TState>(state: TState) => {
                     Component,
                     stateProps,
                     functionProps
-                });
+                }, this.props.children);
             }
 
             render() {
