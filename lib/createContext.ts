@@ -1,73 +1,83 @@
 import * as React from "react";
-
-export type IOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-
-export type IShared<
-    InjectedProps,
-    DecorationTargetProps extends IShared<InjectedProps, DecorationTargetProps>
-> = {
-    [P in Extract<
-        keyof InjectedProps,
-        keyof DecorationTargetProps
-    >]?: InjectedProps[P] extends DecorationTargetProps[P]
-        ? DecorationTargetProps[P]
-        : never
-};
+import { shallowEqual } from "shallow-equal-object";
 
 export interface IMapStateToProps<TState, TStateProps, TOwnProps> {
     (state: TState, ownProps: TOwnProps): TStateProps;
 }
 
-export interface IInferableComponentEnhancerWithProps<
-    TInjectedProps,
-    TNeedsProps
+export interface IMapStateToFunctions<
+    TState,
+    TStateProps,
+    TFunctionProps,
+    TOwnProps
 > {
-    <P extends IShared<TInjectedProps, P>>(
-        component: React.ComponentType<P>
-    ): React.ComponentClass<
-        IOmit<P, keyof IShared<TInjectedProps, P>> & TNeedsProps
-    > & { WrappedComponent: React.ComponentType<P> };
+    (
+        state: TState,
+        ownProps: TOwnProps,
+        stateProps: TStateProps
+    ): TFunctionProps;
 }
 
-export type IProvider<TState> = React.ComponentType<
-    React.ProviderProps<TState>
->;
-
-export type IConsumer<TState> = React.ComponentType<
-    React.ConsumerProps<TState>
->;
-
-export type IConnect<TState> = <TStateProps = {}, TOwnProps = {}>(
-    mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>
-) => <P extends IShared<TStateProps, P>>(
-    Component: React.ComponentType<P>
-) => React.ComponentClass<
-    Pick<P, Exclude<keyof P, Extract<keyof TStateProps, keyof P>>> & TOwnProps,
-    any
-> & { WrappedComponent: React.ComponentType<P> };
-
-export interface IContext<TState> {
-    connect: IConnect<TState>;
-    Provider: IProvider<TState>;
-    Consumer: IConsumer<TState>;
+interface IntermediateProps<StateProps, FunctionProps> {
+    componentRef: React.RefObject<
+        React.ComponentType<StateProps & FunctionProps>
+    >;
+    stateProps: StateProps;
+    functionProps: FunctionProps;
+    Component: React.ComponentType<StateProps & FunctionProps>;
 }
 
-export const createContext = <TState>(state: TState): IContext<TState> => {
+class Intermediate<StateProps, FunctionProps> extends React.Component<
+    IntermediateProps<StateProps, FunctionProps>
+> {
+    constructor(props: IntermediateProps<StateProps, FunctionProps>) {
+        super(props);
+    }
+    shouldComponentUpdate(
+        nextProps: IntermediateProps<StateProps, FunctionProps>
+    ) {
+        return !shallowEqual(this.props.stateProps, nextProps.stateProps);
+    }
+    render() {
+        const {
+            componentRef,
+            stateProps,
+            functionProps,
+            Component
+        } = this.props;
+
+        return React.createElement(Component as any, {
+            ref: componentRef,
+            ...(stateProps || {}),
+            ...(functionProps || {})
+        });
+    }
+}
+
+const RETURNS_EMPTY_OBJECT = () => ({});
+
+export const createContext = <TState>(state: TState) => {
     const { Provider, Consumer } = React.createContext(state);
 
-    const connect = <TStateProps = {}, TOwnProps = {}>(
-        mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>
-    ) => <P extends IShared<TStateProps, P>>(
-        Component: React.ComponentType<P>
-    ): React.ComponentClass<
-        IOmit<P, keyof IShared<TStateProps, P>> & TOwnProps
-    > & { WrappedComponent: React.ComponentType<P> } => {
-        const Connect = class Connect extends React.PureComponent<TOwnProps> {
+    const connect = <TStateProps = {}, TFunctionProps = {}, TOwnProps = {}>(
+        mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>,
+        mapStateToFunctions: IMapStateToFunctions<
+            TState,
+            TStateProps,
+            TFunctionProps,
+            TOwnProps
+        > = RETURNS_EMPTY_OBJECT as any
+    ) => (
+        Component: React.ComponentType<TStateProps & TFunctionProps>
+    ): React.ComponentClass<TOwnProps> => {
+        return class Connect extends React.PureComponent<TOwnProps> {
             static displayName = `Connect(${Component.displayName ||
                 Component.name ||
                 "Component"})`;
 
-            componentRef: React.RefObject<React.ComponentType<P>>;
+            componentRef: React.RefObject<
+                React.ComponentType<TStateProps & TFunctionProps>
+            >;
 
             constructor(props: TOwnProps) {
                 super(props);
@@ -77,12 +87,19 @@ export const createContext = <TState>(state: TState): IContext<TState> => {
             }
 
             consumerRender(state: TState) {
-                const props = this.props;
+                const componentRef = this.componentRef,
+                    stateProps = mapStateToProps(state, this.props),
+                    functionProps = mapStateToFunctions(
+                        state,
+                        this.props,
+                        stateProps
+                    );
 
-                return React.createElement(Component as any, {
-                    ref: this.componentRef,
-                    ...(props as {}),
-                    ...(mapStateToProps(state, props) as {})
+                return React.createElement(Intermediate as any, {
+                    componentRef,
+                    Component,
+                    stateProps,
+                    functionProps
                 });
             }
 
@@ -92,9 +109,19 @@ export const createContext = <TState>(state: TState): IContext<TState> => {
                 });
             }
         };
-
-        return Connect as any;
     };
 
     return { connect, Provider, Consumer };
 };
+
+export type IContext = ReturnType<typeof createContext>;
+
+export type IConnect = IContext["connect"];
+
+export type IProvider<TState> = React.ComponentType<
+    React.ProviderProps<TState>
+>;
+
+export type IConsumer<TState> = React.ComponentType<
+    React.ConsumerProps<TState>
+>;

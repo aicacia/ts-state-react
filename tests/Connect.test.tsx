@@ -11,10 +11,11 @@ const dom = new JSDOM("<!doctype html><html><body></body></html>");
 (global as any).document = dom.window.document;
 (global as any).window = dom.window;
 
-const state = new State({ form: { text: "" } }),
+const INITIAL_STATE = { form: { text: "" } },
+    state = new State(INITIAL_STATE),
     formStore = state.getStore("form");
 
-type IState = typeof state.current;
+type IState = typeof INITIAL_STATE;
 
 const { connect, Provider } = createContext(state.getState());
 
@@ -42,9 +43,16 @@ class Text extends React.PureComponent<ITextProps> {
     }
 }
 
-const ConnectedText = connect((state: IState) => ({
-    text: selectText(state)
-}))(Text);
+interface ITextOwnProps {
+    symbol: string;
+}
+
+const ConnectedText = connect<ITextProps, {}, ITextOwnProps>(
+    (state: IState, props: ITextOwnProps) => ({
+        text: selectText(state),
+        symbol: props.symbol
+    })
+)(Text);
 
 interface IFormProps {
     text: string;
@@ -76,14 +84,16 @@ class Form extends React.PureComponent<IFormProps> {
     }
 }
 
-const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    formStore.setState({ text: e.target.value });
-};
-
-var ConnectedForm = connect(({ form: { text } }) => ({
-    text,
-    onChange
-}))(Form);
+const ConnectedForm = connect(
+    ({ form: { text } }: IState) => ({
+        text
+    }),
+    () => ({
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            formStore.setState({ text: e.target.value });
+        }
+    })
+)(Form);
 
 interface IRootState {
     value: IState;
@@ -119,7 +129,7 @@ class Root extends React.Component<{}, IRootState> {
 }
 
 tape("connect update", (assert: tape.Test) => {
-    var wrapper = Enzyme.mount(React.createElement(Root));
+    const wrapper = Enzyme.mount(React.createElement(Root));
 
     assert.equals(
         ((wrapper.instance() as Root).formRef.current.constructor as any)
