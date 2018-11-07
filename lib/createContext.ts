@@ -18,40 +18,45 @@ export interface IMapStateToFunctions<
     ): TFunctionProps;
 }
 
-interface IntermediateProps<StateProps, FunctionProps> {
+interface IntermediateProps<StateProps, FunctionProps, OwnProps> {
     componentRef: React.RefObject<
         React.ComponentType<StateProps & FunctionProps>
     >;
+    props: OwnProps;
     stateProps: StateProps;
     functionProps: FunctionProps;
     Component: React.ComponentType<StateProps & FunctionProps>;
 }
 
-class Intermediate<StateProps, FunctionProps> extends React.Component<
-    IntermediateProps<StateProps, FunctionProps>
+class Intermediate<StateProps, FunctionProps, OwnProps> extends React.Component<
+    IntermediateProps<StateProps, FunctionProps, OwnProps>
 > {
-    constructor(props: IntermediateProps<StateProps, FunctionProps>) {
+    constructor(props: IntermediateProps<StateProps, FunctionProps, OwnProps>) {
         super(props);
     }
     shouldComponentUpdate(
-        nextProps: IntermediateProps<StateProps, FunctionProps>
+        nextProps: IntermediateProps<StateProps, FunctionProps, OwnProps>
     ) {
-        return !shallowEqual(this.props.stateProps, nextProps.stateProps);
+        return (
+            !shallowEqual(this.props.props, nextProps.props) ||
+            !shallowEqual(this.props.stateProps, nextProps.stateProps)
+        );
     }
     render() {
         const {
             componentRef,
+            props,
             stateProps,
             functionProps,
-            Component,
-            children
+            Component
         } = this.props;
 
         return React.createElement(Component as any, {
             ref: componentRef,
+            ...(props || {}),
             ...(stateProps || {}),
             ...(functionProps || {})
-        }, children);
+        });
     }
 }
 
@@ -89,19 +94,21 @@ export const createContext = <TState>(state: TState) => {
 
             consumerRender(state: TState) {
                 const componentRef = this.componentRef,
-                    stateProps = mapStateToProps(state, this.props),
+                    props = this.props,
+                    stateProps = mapStateToProps(state, props),
                     functionProps = mapStateToFunctions(
                         state,
-                        this.props,
+                        props,
                         stateProps
                     );
 
                 return React.createElement(Intermediate as any, {
                     componentRef,
                     Component,
+                    props,
                     stateProps,
                     functionProps
-                }, this.props.children);
+                });
             }
 
             render() {
