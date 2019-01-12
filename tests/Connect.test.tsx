@@ -1,9 +1,9 @@
-import * as tape from "tape";
-import { JSDOM } from "jsdom";
-import * as React from "react";
+import { State } from "@stembord/state";
 import * as Enzyme from "enzyme";
 import * as EnzymeAdapter from "enzyme-adapter-react-16";
-import { State } from "@stembord/state";
+import { JSDOM } from "jsdom";
+import * as React from "react";
+import * as tape from "tape";
 import { createContext } from "../lib";
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>");

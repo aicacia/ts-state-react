@@ -1,18 +1,21 @@
 import * as React from "react";
 import { shallowEqual } from "shallow-equal-object";
 
-export interface IMapStateToProps<TState, TStateProps, TOwnProps> {
-  (state: TState, ownProps: TOwnProps): TStateProps;
-}
+export type IMapStateToProps<TState, TStateProps, TOwnProps> = (
+  state: TState,
+  ownProps: TOwnProps
+) => TStateProps;
 
-export interface IMapStateToFunctions<
+export type IMapStateToFunctions<
   TState,
   TStateProps,
   TFunctionProps,
   TOwnProps
-> {
-  (state: TState, ownProps: TOwnProps, stateProps: TStateProps): TFunctionProps;
-}
+> = (
+  state: TState,
+  ownProps: TOwnProps,
+  stateProps: TStateProps
+) => TFunctionProps;
 
 interface IntermediateProps<StateProps, FunctionProps, OwnProps> {
   componentRef: React.RefObject<

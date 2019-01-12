@@ -1,6 +1,6 @@
 {
   "name": "@stembord/state-react",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "connect react components with state stores",
   "repository": {
     "type": "git",
@@ -15,7 +15,10 @@
     "test": "ts-node ./node_modules/tape/bin/tape ./tests/**/*.test.{ts,tsx} | tap-spec",
     "clean": "npm run clean_build",
     "clean_build": "rm -rf ./src",
-    "format": "prettier --write '**/*.{js,jsx,ts,tsx,json}'"
+    "format.ts": "prettier-tslint fix '**/*.{ts,tsx}'",
+    "format.js": "prettier --write '**/*.{js,jsx,json}' --ignore-path .gitignore",
+    "format": "npm run format.ts && npm run format.js",
+    "lint": "tslint -c tslint.json 'lib/**/*.{ts,tsx}'"
   },
   "keywords": [
     "state",
@@ -25,7 +28,7 @@
   "license": "(MIT OR Apache-2.0)",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "@stembord/state": "^0.2.1",
+    "@stembord/state": "^0.2.2",
     "@types/enzyme": "^3.1.15",
     "@types/enzyme-adapter-react-16": "^1.0.3",
     "@types/jsdom": "^12.2.1",
@@ -35,11 +38,14 @@
     "enzyme-adapter-react-16": "^1.7.1",
     "jsdom": "^13.1.0",
     "prettier": "^1.15.3",
+    "prettier-tslint": "^0.4.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.2",
     "ts-node": "^7.0.1",
+    "tslint": "^5.12.0",
+    "tslint-config-prettier": "^1.17.0",
     "typescript": "^3.2.2"
   },
   "peerDependencies": {

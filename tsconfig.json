@@ -8,6 +8,5 @@
     "strict": true,
     "lib": ["es2018", "dom"]
   },
-  "include": ["lib/**/*.ts"],
-  "exclude": ["node_modules", "tests/**/*.test.ts"]
+  "include": ["lib"]
 }
