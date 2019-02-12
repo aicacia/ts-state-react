@@ -15,18 +15,18 @@ export const createHook = <TState>(state: State<TState>) => {
     > = RETURNS_EMPTY_OBJECT as any,
     ownProps: TOwnProps = {} as any
   ) => {
-    const get = (nextState: TState) => {
+    const [currentState, setState] = React.useState(getState(state.getState()));
+
+    function getState(nextState: TState) {
       const stateProps = mapStateToProps(nextState, ownProps),
         functionProps = mapStateToFunctions(nextState, ownProps, stateProps);
 
       return { ...ownProps, ...stateProps, ...functionProps };
-    };
+    }
 
-    const onChange = (nextState: TState) => {
-      setState(get(nextState));
-    };
-
-    const [currentState, setState] = React.useState(get(state.getState()));
+    function onChange(nextState: TState) {
+      setState(getState(nextState));
+    }
 
     React.useEffect(() => {
       state.addListener("set-state", onChange);

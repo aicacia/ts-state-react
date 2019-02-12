@@ -35,7 +35,7 @@ class Text extends React.PureComponent<ITextProps> {
     const { text, symbol } = this.props;
     RENDER_CALLED += 1;
     return (
-      <p>
+      <p id="text">
         {text}
         {symbol}
       </p>
@@ -60,22 +60,12 @@ interface IFormProps {
 }
 
 class Form extends React.PureComponent<IFormProps> {
-  inputRef: any;
-
-  constructor(props: IFormProps) {
-    super(props);
-
-    this.inputRef = React.createRef();
-  }
-
   render() {
     const { text, onChange } = this.props;
 
     RENDER_CALLED += 1;
 
-    return (
-      <input onChange={onChange} type="text" ref={this.inputRef} value={text} />
-    );
+    return <input id="input" onChange={onChange} type="text" value={text} />;
   }
 }
 
@@ -95,12 +85,8 @@ interface IRootState {
 }
 
 class Root extends React.Component<{}, IRootState> {
-  formRef: React.RefObject<any>;
-
   constructor(props: {}) {
     super(props);
-
-    this.formRef = React.createRef();
 
     this.state = {
       value: state.getState()
@@ -115,7 +101,7 @@ class Root extends React.Component<{}, IRootState> {
     return (
       <Provider value={this.state.value}>
         <ConnectedText key="text" symbol="!" />
-        <ConnectedForm ref={this.formRef} key="form" />
+        <ConnectedForm key="form" />
       </Provider>
     );
   }
@@ -124,21 +110,14 @@ class Root extends React.Component<{}, IRootState> {
 tape("connect update", (assert: tape.Test) => {
   const wrapper = Enzyme.mount(<Root />);
 
-  assert.equals(
-    ((wrapper.instance() as Root).formRef.current.constructor as any)
-      .displayName,
-    "Connect(Form)",
-    "should wrap component name"
-  );
   assert.equals(formStore.getState().text, "", "store text should be empty");
   assert.equals(
-    (wrapper.instance() as Root).formRef.current.componentRef.current.props
-      .text,
+    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
     "",
-    "component props should reflect stores"
+    "input value should reflect stores"
   );
 
-  wrapper.find("input").simulate("change", { target: { value: "text" } });
+  wrapper.find("#input").simulate("change", { target: { value: "text" } });
 
   assert.equals(
     formStore.getState().text,
@@ -146,13 +125,12 @@ tape("connect update", (assert: tape.Test) => {
     "store's value should update"
   );
   assert.equals(
-    (wrapper.instance() as Root).formRef.current.componentRef.current.props
-      .text,
+    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
     "text",
-    "text should update to new store's value"
+    "input value should update to new store's value"
   );
 
-  wrapper.find("input").simulate("change", { target: { value: "text" } });
+  wrapper.find("#input").simulate("change", { target: { value: "text" } });
 
   assert.equals(
     formStore.getState().text,
@@ -160,10 +138,9 @@ tape("connect update", (assert: tape.Test) => {
     "store's text should not have changed"
   );
   assert.equals(
-    (wrapper.instance() as Root).formRef.current.componentRef.current.props
-      .text,
+    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
     "text",
-    "text should not have changed"
+    "input value should not have changed"
   );
   wrapper.unmount();
 

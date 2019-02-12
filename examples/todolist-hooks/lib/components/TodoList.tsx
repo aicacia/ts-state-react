@@ -14,7 +14,7 @@ interface ITodoListProps {}
 
 const mapStateToProps = (
   state: IState,
-  props: ITodoListProps
+  ownProps: ITodoListProps
 ): ITodoListStateProps => ({
   list: selectAll(state)
 });
@@ -32,24 +32,29 @@ export const TodoList = (ownProps: ITodoListProps) => {
   const [text, setText] = React.useState("");
   const props = useState(mapStateToProps, mapStateToFunctions, ownProps);
 
-  const onSubmit = e => {
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     props.createTodo(text);
     setText("");
   };
 
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setText(e.target.value);
+
+  const createOnRemove = (id: number) => () => props.removeTodo(id);
+
   return (
     <div>
       <form onSubmit={onSubmit}>
-        <input value={text} onChange={e => setText(e.target.value)} />
+        <input value={text} onChange={onChange} />
       </form>
       <ul>
         {props.list.map(todo => (
           <Todo
             key={todo.id}
             text={todo.text}
-            onRemove={() => props.removeTodo(todo.id)}
+            onRemove={createOnRemove(todo.id)}
           />
         ))}
       </ul>
