@@ -4,34 +4,36 @@ import { IMapStateToFunctions } from "./IMapStateToFunctions";
 import { IMapStateToProps } from "./IMapStateToProps";
 import { RETURNS_EMPTY_OBJECT } from "./RETURNS_EMPTY_OBJECT";
 
-interface IntermediateProps<StateProps, FunctionProps, OwnProps> {
+export interface IConnectProps<StateProps, FunctionProps, OwnProps> {
   componentRef: React.RefObject<
     React.ComponentType<StateProps & FunctionProps>
   >;
-  props: OwnProps;
+  ownProps: OwnProps;
   stateProps: StateProps;
   functionProps: FunctionProps;
   Component: React.ComponentType<StateProps & FunctionProps>;
 }
 
-class Intermediate<StateProps, FunctionProps, OwnProps> extends React.Component<
-  IntermediateProps<StateProps, FunctionProps, OwnProps>
-> {
-  constructor(props: IntermediateProps<StateProps, FunctionProps, OwnProps>) {
+export class Connect<
+  StateProps,
+  FunctionProps,
+  OwnProps
+> extends React.Component<IConnectProps<StateProps, FunctionProps, OwnProps>> {
+  constructor(props: IConnectProps<StateProps, FunctionProps, OwnProps>) {
     super(props);
   }
   shouldComponentUpdate(
-    nextProps: IntermediateProps<StateProps, FunctionProps, OwnProps>
+    nextProps: IConnectProps<StateProps, FunctionProps, OwnProps>
   ) {
     return (
-      !shallowEqual(this.props.props, nextProps.props) ||
+      !shallowEqual(this.props.ownProps, nextProps.ownProps) ||
       !shallowEqual(this.props.stateProps, nextProps.stateProps)
     );
   }
   render() {
     const {
       componentRef,
-      props,
+      ownProps,
       stateProps,
       functionProps,
       Component
@@ -39,16 +41,14 @@ class Intermediate<StateProps, FunctionProps, OwnProps> extends React.Component<
 
     return React.createElement(Component as any, {
       ref: componentRef,
-      ...(props || {}),
+      ...(ownProps || {}),
       ...(stateProps || {}),
       ...(functionProps || {})
     });
   }
 }
 
-export const createContext = <TState>(state: TState) => {
-  const { Provider, Consumer } = React.createContext(state);
-
+export const createConnect = <TState>(Context: React.Context<TState>) => {
   const connect = <TStateProps = {}, TFunctionProps = {}, TOwnProps = {}>(
     mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>,
     mapStateToFunctions: IMapStateToFunctions<
@@ -60,7 +60,7 @@ export const createContext = <TState>(state: TState) => {
   ) => (
     Component: React.ComponentType<TStateProps & TFunctionProps>
   ): React.ComponentClass<TOwnProps> => {
-    return class Connect extends React.PureComponent<TOwnProps> {
+    return class Connected extends React.PureComponent<TOwnProps> {
       static displayName = `Connect(${Component.displayName ||
         Component.name ||
         "Component"})`;
@@ -82,7 +82,7 @@ export const createContext = <TState>(state: TState) => {
           stateProps = mapStateToProps(state, props),
           functionProps = mapStateToFunctions(state, props, stateProps);
 
-        return React.createElement(Intermediate as any, {
+        return React.createElement(Connect as any, {
           componentRef,
           Component,
           props,
@@ -92,24 +92,20 @@ export const createContext = <TState>(state: TState) => {
       }
 
       render() {
-        return React.createElement(Consumer, {
+        return React.createElement(Context.Consumer, {
           children: this.consumerRender
         });
       }
     };
   };
 
-  return { connect, Provider, Consumer };
+  return connect;
 };
 
-export type IContext = ReturnType<typeof createContext>;
+export const createContext = <TState>(initialState: TState) => {
+  const Context = React.createContext(initialState),
+    { Provider, Consumer } = Context,
+    connect = createConnect(Context);
 
-export type IConnect = IContext["connect"];
-
-export type IProvider<TState> = React.ComponentType<
-  React.ProviderProps<TState>
->;
-
-export type IConsumer<TState> = React.ComponentType<
-  React.ConsumerProps<TState>
->;
+  return { connect, Provider, Consumer, Context };
+};

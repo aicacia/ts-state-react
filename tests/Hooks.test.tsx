@@ -17,7 +17,7 @@ const INITIAL_STATE = { form: { text: "" } },
 
 type IState = typeof INITIAL_STATE;
 
-const useState = createHook(state);
+const { useState, Provider } = createHook(state.getState());
 
 const selectText = ({ form }: IState) => form.text;
 
@@ -105,12 +105,32 @@ const Form = (ownProps: IFormOwnProps) => {
   );
 };
 
-const Root = () => (
-  <div>
-    <Text symbol="!" />
-    <Form />
-  </div>
-);
+interface IRootState {
+  value: IState;
+}
+
+class Root extends React.Component<{}, IRootState> {
+  constructor(props: {}) {
+    super(props);
+
+    this.state = {
+      value: state.getState()
+    };
+
+    state.on("set-state", value => {
+      this.setState({ value });
+    });
+  }
+
+  render() {
+    return (
+      <Provider value={this.state.value}>
+        <Text symbol="!" />
+        <Form />
+      </Provider>
+    );
+  }
+}
 
 tape("hook update", (assert: tape.Test) => {
   const wrapper = Enzyme.mount(<Root />);
@@ -121,39 +141,51 @@ tape("hook update", (assert: tape.Test) => {
     "",
     "input element should reflect stores"
   );
+  assert.equals(
+    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    "!",
+    "text element should reflect stores"
+  );
 
   wrapper.find("#input").simulate("change", { target: { value: "text" } });
 
-  setTimeout(() => {
-    assert.equals(
-      formStore.getState().text,
-      "text",
-      "store's value should update"
-    );
-    assert.equals(
-      (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
-      "text",
-      "input value should update to new store's value"
-    );
+  assert.equals(
+    formStore.getState().text,
+    "text",
+    "store's value should update"
+  );
+  assert.equals(
+    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    "text",
+    "input value should update to new store's value"
+  );
+  assert.equals(
+    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    "text!",
+    "text value should update to new store's value"
+  );
 
-    wrapper.find("#input").simulate("change", { target: { value: "text" } });
+  wrapper.find("#input").simulate("change", { target: { value: "text" } });
 
-    setTimeout(() => {
-      assert.equals(
-        formStore.getState().text,
-        "text",
-        "store's text should not have changed"
-      );
-      assert.equals(
-        (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
-        "text",
-        "input value should not have changed"
-      );
-      wrapper.unmount();
+  assert.equals(
+    formStore.getState().text,
+    "text",
+    "store's text should not have changed"
+  );
+  assert.equals(
+    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    "text",
+    "input value should not have changed"
+  );
+  assert.equals(
+    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    "text!",
+    "text value should not have changed"
+  );
 
-      assert.equals(RENDER_CALLED, 4, "render should have been called");
+  wrapper.unmount();
 
-      assert.end();
-    });
-  });
+  assert.equals(RENDER_CALLED, 6, "render should have been called");
+
+  assert.end();
 });

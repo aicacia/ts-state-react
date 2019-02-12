@@ -4,8 +4,11 @@ export interface ITodo {
 }
 
 export interface ITodos {
-  list: ITodo[];
+  text: string;
+  todos: {
+    [id: number]: ITodo;
+  };
 }
 
-export const INITIAL_STATE: ITodos = { list: [] };
+export const INITIAL_STATE: ITodos = { text: "", todos: {} };
 export const STORE_NAME = "todos";

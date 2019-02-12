@@ -1,21 +1,27 @@
 import * as React from "react";
 import { IState, useState } from "../state";
-import { create, ITodo, remove, selectAll } from "../stores/todos";
+import {
+  create,
+  ITodo,
+  remove,
+  selectAll,
+  selectText,
+  setText
+} from "../stores/todos";
 import { Todo } from "./Todo";
 
 interface ITodoListStateProps {
+  text: string;
   list: ITodo[];
 }
-interface ITodoListFunctionProps {
-  createTodo: (text: string) => void;
-  removeTodo: (id: number) => void;
-}
+interface ITodoListFunctionProps {}
 interface ITodoListProps {}
 
 const mapStateToProps = (
   state: IState,
   ownProps: ITodoListProps
 ): ITodoListStateProps => ({
+  text: selectText(state),
   list: selectAll(state)
 });
 
@@ -23,31 +29,27 @@ const mapStateToFunctions = (
   state: IState,
   ownProps: ITodoListProps,
   stateProps: ITodoListStateProps
-): ITodoListFunctionProps => ({
-  createTodo: create,
-  removeTodo: remove
-});
+): ITodoListFunctionProps => ({});
 
 export const TodoList = (ownProps: ITodoListProps) => {
-  const [text, setText] = React.useState("");
   const props = useState(mapStateToProps, mapStateToFunctions, ownProps);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    props.createTodo(text);
+    create(props.text);
     setText("");
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setText(e.target.value);
 
-  const createOnRemove = (id: number) => () => props.removeTodo(id);
+  const createOnRemove = (id: number) => () => remove(id);
 
   return (
     <div>
       <form onSubmit={onSubmit}>
-        <input value={text} onChange={onChange} />
+        <input value={props.text} onChange={onChange} />
       </form>
       <ul>
         {props.list.map(todo => (

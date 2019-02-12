@@ -30,10 +30,12 @@ interface ITextProps {
   symbol: string;
 }
 
-class Text extends React.PureComponent<ITextProps> {
+class TextImpl extends React.PureComponent<ITextProps> {
   render() {
     const { text, symbol } = this.props;
+
     RENDER_CALLED += 1;
+
     return (
       <p id="text">
         {text}
@@ -52,7 +54,7 @@ const ConnectedText = connect<ITextProps, {}, ITextOwnProps>(
     text: selectText(state),
     symbol: props.symbol
   })
-)(Text);
+)(TextImpl);
 
 interface IFormProps {
   text: string;
@@ -116,6 +118,11 @@ tape("connect update", (assert: tape.Test) => {
     "",
     "input value should reflect stores"
   );
+  assert.equals(
+    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    "!",
+    "text value should reflect stores"
+  );
 
   wrapper.find("#input").simulate("change", { target: { value: "text" } });
 
@@ -128,6 +135,11 @@ tape("connect update", (assert: tape.Test) => {
     (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
     "text",
     "input value should update to new store's value"
+  );
+  assert.equals(
+    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    "text!",
+    "text value should update to new store's value"
   );
 
   wrapper.find("#input").simulate("change", { target: { value: "text" } });
@@ -142,6 +154,12 @@ tape("connect update", (assert: tape.Test) => {
     "text",
     "input value should not have changed"
   );
+  assert.equals(
+    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    "text!",
+    "text value should not have changed"
+  );
+
   wrapper.unmount();
 
   assert.equals(RENDER_CALLED, 4, "render should have been called");
