@@ -95,13 +95,11 @@ interface IRootState {
 }
 
 class Root extends React.Component<{}, IRootState> {
-  textRef: React.RefObject<any>;
   formRef: React.RefObject<any>;
 
   constructor(props: {}) {
     super(props);
 
-    this.textRef = React.createRef();
     this.formRef = React.createRef();
 
     this.state = {
@@ -116,7 +114,7 @@ class Root extends React.Component<{}, IRootState> {
   render() {
     return (
       <Provider value={this.state.value}>
-        <ConnectedText ref={this.textRef} key="text" symbol="!" />
+        <ConnectedText key="text" symbol="!" />
         <ConnectedForm ref={this.formRef} key="form" />
       </Provider>
     );
@@ -124,7 +122,7 @@ class Root extends React.Component<{}, IRootState> {
 }
 
 tape("connect update", (assert: tape.Test) => {
-  const wrapper = Enzyme.mount(React.createElement(Root));
+  const wrapper = Enzyme.mount(<Root />);
 
   assert.equals(
     ((wrapper.instance() as Root).formRef.current.constructor as any)

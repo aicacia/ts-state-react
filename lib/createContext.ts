@@ -1,21 +1,8 @@
 import * as React from "react";
 import { shallowEqual } from "shallow-equal-object";
-
-export type IMapStateToProps<TState, TStateProps, TOwnProps> = (
-  state: TState,
-  ownProps: TOwnProps
-) => TStateProps;
-
-export type IMapStateToFunctions<
-  TState,
-  TStateProps,
-  TFunctionProps,
-  TOwnProps
-> = (
-  state: TState,
-  ownProps: TOwnProps,
-  stateProps: TStateProps
-) => TFunctionProps;
+import { IMapStateToFunctions } from "./IMapStateToFunctions";
+import { IMapStateToProps } from "./IMapStateToProps";
+import { RETURNS_EMPTY_OBJECT } from "./RETURNS_EMPTY_OBJECT";
 
 interface IntermediateProps<StateProps, FunctionProps, OwnProps> {
   componentRef: React.RefObject<
@@ -58,8 +45,6 @@ class Intermediate<StateProps, FunctionProps, OwnProps> extends React.Component<
     });
   }
 }
-
-const RETURNS_EMPTY_OBJECT = () => ({});
 
 export const createContext = <TState>(state: TState) => {
   const { Provider, Consumer } = React.createContext(state);

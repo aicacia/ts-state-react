@@ -1,6 +1,6 @@
 {
   "name": "@stembord/state-react",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "connect react components with state stores",
   "repository": {
     "type": "git",
@@ -28,7 +28,6 @@
   "license": "(MIT OR Apache-2.0)",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "@stembord/state": "^0.2.2",
     "@types/enzyme": "^3.1.15",
     "@types/enzyme-adapter-react-16": "^1.0.3",
     "@types/jsdom": "^12.2.1",
@@ -39,8 +38,8 @@
     "jsdom": "^13.1.0",
     "prettier": "^1.15.3",
     "prettier-tslint": "^0.4.2",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
+    "react": "^16.8.1",
+    "react-dom": "^16.8.1",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.2",
     "ts-node": "^7.0.1",
@@ -49,9 +48,10 @@
     "typescript": "^3.2.2"
   },
   "peerDependencies": {
-    "react": ">= 16.7.0"
+    "react": ">= 16.8.1"
   },
   "dependencies": {
+    "@stembord/state": ">= 0.2.2",
     "shallow-equal-object": "^1.1.1"
   }
 }
