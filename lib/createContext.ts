@@ -6,12 +6,12 @@ import { RETURNS_EMPTY_OBJECT } from "./RETURNS_EMPTY_OBJECT";
 
 export interface IConnectProps<StateProps, FunctionProps, OwnProps> {
   componentRef: React.RefObject<
-    React.ComponentType<StateProps & FunctionProps>
+    React.ComponentType<OwnProps & StateProps & FunctionProps>
   >;
   ownProps: OwnProps;
   stateProps: StateProps;
   functionProps: FunctionProps;
-  Component: React.ComponentType<StateProps & FunctionProps>;
+  Component: React.ComponentType<OwnProps & StateProps & FunctionProps>;
 }
 
 export class Connect<
@@ -58,7 +58,7 @@ export const createConnect = <TState>(Context: React.Context<TState>) => {
       TOwnProps
     > = RETURNS_EMPTY_OBJECT as any
   ) => (
-    Component: React.ComponentType<TStateProps & TFunctionProps>
+    Component: React.ComponentType<TOwnProps & TStateProps & TFunctionProps>
   ): React.ComponentClass<TOwnProps> => {
     return class Connected extends React.PureComponent<TOwnProps> {
       static displayName = `Connect(${Component.displayName ||
@@ -66,30 +66,29 @@ export const createConnect = <TState>(Context: React.Context<TState>) => {
         "Component"})`;
 
       componentRef: React.RefObject<
-        React.ComponentType<TStateProps & TFunctionProps>
+        React.ComponentType<TOwnProps & TStateProps & TFunctionProps>
       >;
 
       constructor(props: TOwnProps) {
         super(props);
 
         this.componentRef = React.createRef();
-        this.consumerRender = this.consumerRender.bind(this);
       }
 
-      consumerRender(state: TState) {
+      consumerRender = (state: TState) => {
         const componentRef = this.componentRef,
-          props = this.props,
-          stateProps = mapStateToProps(state, props),
-          functionProps = mapStateToFunctions(state, props, stateProps);
+          ownProps = this.props,
+          stateProps = mapStateToProps(state, ownProps),
+          functionProps = mapStateToFunctions(state, ownProps, stateProps);
 
         return React.createElement(Connect as any, {
           componentRef,
           Component,
-          props,
+          ownProps,
           stateProps,
           functionProps
         });
-      }
+      };
 
       render() {
         return React.createElement(Context.Consumer, {
