@@ -1,6 +1,6 @@
 {
   "name": "@stembord/state-react",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "connect react components with state stores",
   "repository": {
     "type": "git",
@@ -51,7 +51,7 @@
     "react": ">= 16.8.1"
   },
   "dependencies": {
-    "@stembord/state": ">= 0.2.2",
+    "@stembord/state": ">= 0.2.4",
     "shallow-equal-object": "^1.1.1"
   }
 }

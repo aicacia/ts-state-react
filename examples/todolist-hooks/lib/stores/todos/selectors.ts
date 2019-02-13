@@ -1,5 +1,5 @@
 import { IState } from "../../state";
 
-export const selectAll = ({ todos: { todos } }: IState) =>
-  Object.keys(todos).map(id => todos[id]);
-export const selectText = ({ todos: { text } }: IState) => text;
+export const selectAll = (state: IState) =>
+  Object.keys(state.get("todos")).map(id => state.get("todos")[id]);
+export const selectText = (state: IState) => state.get("todos").text;

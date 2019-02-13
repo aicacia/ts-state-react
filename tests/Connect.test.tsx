@@ -15,11 +15,11 @@ const INITIAL_STATE = { form: { text: "" } },
   state = new State(INITIAL_STATE),
   formStore = state.getStore("form");
 
-type IState = typeof INITIAL_STATE;
+type IState = typeof state.current;
 
 const { connect, Provider } = createContext(state.getState());
 
-const selectText = ({ form }: IState) => form.text;
+const selectText = (state: IState) => state.get("form").text;
 
 let RENDER_CALLED = 0;
 
@@ -72,8 +72,8 @@ class Form extends React.PureComponent<IFormProps> {
 }
 
 const ConnectedForm = connect(
-  ({ form: { text } }: IState) => ({
-    text
+  (state: IState) => ({
+    text: state.get("form").text
   }),
   () => ({
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {

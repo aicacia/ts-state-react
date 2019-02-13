@@ -15,11 +15,11 @@ const INITIAL_STATE = { form: { text: "" } },
   state = new State(INITIAL_STATE),
   formStore = state.getStore("form");
 
-type IState = typeof INITIAL_STATE;
+type IState = typeof state.current;
 
 const { useState, Provider } = createHook(state.getState());
 
-const selectText = ({ form }: IState) => form.text;
+const selectText = (state: IState) => state.get("form").text;
 
 let RENDER_CALLED = 0;
 
@@ -75,10 +75,10 @@ interface IFormFunctionProps {
 interface IFormOwnProps {}
 
 const FormMapStateToProps = (
-  { form: { text } }: IState,
+  state: IState,
   ownProps: IFormOwnProps
 ): IFormStateProps => ({
-  text
+  text: state.get("form").text
 });
 const FormMapStateToFunctions = (): IFormFunctionProps => ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
