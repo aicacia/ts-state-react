@@ -1,4 +1,4 @@
-import { State } from "@aicacia/state";
+import { State } from "@stembord/state";
 import { createContext } from "../../../lib";
 import { INITIAL_STATE as todos } from "./stores/todos/definitions";
 
