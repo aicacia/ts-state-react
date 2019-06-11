@@ -1,6 +1,6 @@
 {
   "name": "@stembord/state-react",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "connect react components with state stores",
   "repository": {
     "type": "git",
@@ -27,30 +27,30 @@
   "license": "(MIT OR Apache-2.0)",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "@types/enzyme": "^3.9.1",
+    "@types/enzyme": "^3.9.3",
     "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/jsdom": "^12.2.3",
-    "@types/react": "^16.8.14",
+    "@types/react": "^16.8.19",
     "@types/tape": "^4.2.33",
-    "enzyme": "^3.9.0",
-    "enzyme-adapter-react-16": "^1.12.1",
-    "jsdom": "^15.0.0",
-    "prettier": "^1.17.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "jsdom": "^15.1.1",
+    "prettier": "^1.18.2",
     "prettier-tslint": "^0.4.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "tap-spec": "^5.0.0",
-    "tape": "^4.10.1",
-    "ts-node": "^8.1.0",
-    "tslint": "^5.16.0",
+    "tape": "^4.10.2",
+    "ts-node": "^8.2.0",
+    "tslint": "^5.17.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.4.4"
+    "typescript": "^3.5.1"
   },
   "peerDependencies": {
     "react": ">= 16.8.6"
   },
   "dependencies": {
-    "@stembord/state": "^0.2.5",
+    "@stembord/state": "^0.2.6",
     "shallow-equal-object": "^1.1.1"
   }
 }
