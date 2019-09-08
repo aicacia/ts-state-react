@@ -8,5 +8,6 @@
     "strict": true,
     "lib": ["es2018", "dom"]
   },
-  "include": ["lib"]
+  "include": ["lib"],
+  "exclude": ["**/*.test.*"]
 }

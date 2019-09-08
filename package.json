@@ -1,6 +1,6 @@
 {
   "name": "@stembord/state-react",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "connect react components with state stores",
   "repository": {
     "type": "git",
@@ -12,12 +12,15 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "ts-node ./node_modules/tape/bin/tape ./tests/**/*.test.{ts,tsx} | tap-spec",
+    "test": "ts-node node_modules/.bin/tape lib/**/*.test.{ts,tsx} | tap-spec",
+    "coverage": "nyc --reporter=lcov --require ts-node/register tape lib/**/*.test.{ts,tsx} | tap-spec; nyc report ---reporter=text",
     "clean": "rm -rf ./src",
-    "format.ts": "prettier-tslint fix '**/*.{ts,tsx}'",
-    "format.js": "prettier --write '**/*.{js,jsx,json}' --ignore-path .gitignore",
-    "format": "npm run format.ts && npm run format.js",
-    "lint": "tslint -c tslint.json 'lib/**/*.{ts,tsx}'"
+    "formatTS": "prettier-tslint fix '**/*.{ts,tsx}'",
+    "formatJS": "prettier --write '**/*.{js,jsx,json}' --ignore-path .gitignore",
+    "format": "npm run formatTS && npm run formatJS",
+    "lint": "tslint -c tslint.json 'lib/**/*.{ts,tsx}' -e 'lib/**/*.test.*'",
+    "todolist-connect": "parcel examples/todolist-connect/index.html",
+    "todolist-hooks": "parcel examples/todolist-hooks/index.html"
   },
   "keywords": [
     "state",
@@ -27,24 +30,27 @@
   "license": "(MIT OR Apache-2.0)",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "@types/enzyme": "^3.9.3",
+    "@types/enzyme": "^3.10.3",
     "@types/enzyme-adapter-react-16": "^1.0.5",
-    "@types/jsdom": "^12.2.3",
-    "@types/react": "^16.8.19",
+    "@types/jsdom": "^12.2.4",
+    "@types/react": "^16.9.2",
     "@types/tape": "^4.2.33",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "jsdom": "^15.1.1",
+    "nyc": "^14.1.1",
+    "parcel-bundler": "^1.12.3",
     "prettier": "^1.18.2",
     "prettier-tslint": "^0.4.2",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "tap-nyc": "^1.0.3",
     "tap-spec": "^5.0.0",
-    "tape": "^4.10.2",
-    "ts-node": "^8.2.0",
-    "tslint": "^5.17.0",
+    "tape": "^4.11.0",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.19.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.5.1"
+    "typescript": "^3.6.2"
   },
   "peerDependencies": {
     "react": ">= 16.8.6"
@@ -52,5 +58,17 @@
   "dependencies": {
     "@stembord/state": "^0.2.6",
     "shallow-equal-object": "^1.1.1"
+  },
+  "nyc": {
+    "include": [
+      "lib/**/*"
+    ],
+    "exclude": [
+      "**/*.test.*"
+    ],
+    "extension": [
+      ".ts",
+      ".tsx"
+    ]
   }
 }

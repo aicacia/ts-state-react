@@ -2,10 +2,6 @@
 
 connect react components with state stores
 
-## Examples
-
-install [parcel](https://parceljs.org/)
-
 ### Hooks
 
 ```ts
@@ -18,8 +14,7 @@ export const { useState, Provider, Consumer, Context } = createHook(
 ```
 
 ```bash
-$ cd examples/todolist-hooks
-$ parcel index.html
+$ npm run todolist-hooks
 ```
 
 ### Connect
@@ -34,6 +29,5 @@ export const { Context, Provider, Consumer, connect } = createContext(
 ```
 
 ```bash
-$ cd examples/todolist-connect
-$ parcel index.html
+$ npm run todolist-connect
 ```

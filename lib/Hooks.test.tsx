@@ -4,7 +4,7 @@ import * as EnzymeAdapter from "enzyme-adapter-react-16";
 import { JSDOM } from "jsdom";
 import * as React from "react";
 import * as tape from "tape";
-import { createHook } from "../lib";
+import { createHook } from "./createHook";
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>");
 
