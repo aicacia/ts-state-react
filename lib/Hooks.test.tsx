@@ -15,7 +15,7 @@ const INITIAL_STATE = { form: { text: "" } },
   state = new State(INITIAL_STATE),
   formStore = state.getStore("form");
 
-type IState = typeof state.current;
+type IState = ReturnType<typeof state.getState>;
 
 const { useState, Provider } = createHook(state.getState());
 
