@@ -1,4 +1,4 @@
-import { State } from "@stembord/state";
+import { State } from "@aicacia/state";
 import * as Enzyme from "enzyme";
 import * as EnzymeAdapter from "enzyme-adapter-react-16";
 import { JSDOM } from "jsdom";

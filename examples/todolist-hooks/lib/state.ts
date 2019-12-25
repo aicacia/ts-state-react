@@ -1,11 +1,11 @@
-import { State } from "@stembord/state";
+import { State } from "@aicacia/state";
 import { createHook } from "../../../lib";
 import { INITIAL_STATE as todos } from "./stores/todos/definitions";
 
 export const state = new State({
   todos
 });
-export type IState = typeof state.current;
+export type IState = ReturnType<typeof state["getState"]>;
 export const { useState, Provider, Consumer, Context } = createHook(
   state.getState()
 );

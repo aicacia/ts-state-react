@@ -1,10 +1,10 @@
 {
-  "name": "@stembord/state-react",
-  "version": "0.2.12",
-  "description": "connect react components with state stores",
+  "name": "@aicacia/state-react",
+  "version": "0.1.1",
+  "description": "connect react components with @aicacia/state stores",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/stembord/ts-state-react.git"
+    "url": "https://gitlab.com/aicacia/libs/ts-state-react.git"
   },
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -56,7 +56,7 @@
     "react": ">= 16.8.6"
   },
   "dependencies": {
-    "@stembord/state": "^0.2.7",
+    "@aicacia/state": "^0.1.1",
     "shallow-equal-object": "^1.1.1"
   },
   "nyc": {

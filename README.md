@@ -1,6 +1,6 @@
 # ts-state-react
 
-connect react components with state stores
+connect react components with @aicacia/state stores
 
 ### Hooks
 
