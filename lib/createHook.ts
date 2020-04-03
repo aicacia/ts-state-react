@@ -1,7 +1,7 @@
 import * as React from "react";
 import { IMapStateToFunctions } from "./IMapStateToFunctions";
 import { IMapStateToProps } from "./IMapStateToProps";
-import { RETURNS_EMPTY_OBJECT } from "./RETURNS_EMPTY_OBJECT";
+import { returnsEmptyObject } from "./returnsEmptyObject";
 
 export const createUseState = <TState>(Context: React.Context<TState>) => {
   const useState = <TStateProps, TFunctionProps, TOwnProps = {}>(
@@ -11,7 +11,7 @@ export const createUseState = <TState>(Context: React.Context<TState>) => {
       TStateProps,
       TFunctionProps,
       TOwnProps
-    > = RETURNS_EMPTY_OBJECT as any,
+    > = returnsEmptyObject as any,
     ownProps: TOwnProps = {} as any
   ) => {
     const state = React.useContext(Context),

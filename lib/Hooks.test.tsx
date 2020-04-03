@@ -25,6 +25,26 @@ let RENDER_CALLED = 0;
 
 Enzyme.configure({ adapter: new EnzymeAdapter() });
 
+interface IDefaultsStateProps {}
+interface IDefaultsOwnProps {}
+
+const DefaultsMapStateToProps = (
+  state: IState,
+  ownProps: IDefaultsOwnProps
+): IDefaultsStateProps => ({});
+
+const Defaults = () => {
+  useState(
+    DefaultsMapStateToProps
+  );
+
+  RENDER_CALLED += 1;
+
+  return (
+    <div>Defaults</div>
+  );
+};
+
 interface ITextStateProps {
   text: string;
   symbol: string;
@@ -127,6 +147,7 @@ class Root extends React.Component<{}, IRootState> {
       <Provider value={this.state.value}>
         <Text symbol="!" />
         <Form />
+        <Defaults/>
       </Provider>
     );
   }
@@ -185,7 +206,7 @@ tape("hook update", (assert: tape.Test) => {
 
   wrapper.unmount();
 
-  assert.equals(RENDER_CALLED, 6, "render should have been called");
+  assert.equals(RENDER_CALLED, 9, "render should have been called");
 
   assert.end();
 });

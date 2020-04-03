@@ -2,7 +2,7 @@ import * as React from "react";
 import { shallowEqual } from "shallow-equal-object";
 import { IMapStateToFunctions } from "./IMapStateToFunctions";
 import { IMapStateToProps } from "./IMapStateToProps";
-import { RETURNS_EMPTY_OBJECT } from "./RETURNS_EMPTY_OBJECT";
+import { returnsEmptyObject } from "./returnsEmptyObject";
 
 export interface IConnectProps<StateProps, FunctionProps, OwnProps> {
   componentRef: React.RefObject<
@@ -41,9 +41,9 @@ export class Connect<
 
     return React.createElement(Component as any, {
       ref: componentRef,
-      ...(ownProps || {}),
-      ...(stateProps || {}),
-      ...(functionProps || {})
+      ...ownProps,
+      ...stateProps,
+      ...functionProps
     });
   }
 }
@@ -56,7 +56,7 @@ export const createConnect = <TState>(Context: React.Context<TState>) => {
       TStateProps,
       TFunctionProps,
       TOwnProps
-    > = RETURNS_EMPTY_OBJECT as any
+    > = returnsEmptyObject as any
   ) => (
     Component: React.ComponentType<TOwnProps & TStateProps & TFunctionProps>
   ): React.ComponentClass<TOwnProps> => {

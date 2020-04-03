@@ -25,6 +25,24 @@ let RENDER_CALLED = 0;
 
 Enzyme.configure({ adapter: new EnzymeAdapter() });
 
+interface IDefaultsProps { }
+
+var DefaultsImpl = (function () {
+  return () => {
+    RENDER_CALLED += 1;
+
+    return (
+      <div>Defaults</div>
+    );
+  }
+}());
+
+interface IDefaultsOwnProps { }
+
+const ConnectedDefaults = connect<IDefaultsProps, {}, IDefaultsOwnProps>(
+  (state: IState, props: IDefaultsOwnProps) => ({})
+)(DefaultsImpl);
+
 interface ITextProps {
   text: string;
   symbol: string;
@@ -104,6 +122,7 @@ class Root extends React.Component<{}, IRootState> {
       <Provider value={this.state.value}>
         <ConnectedText key="text" symbol="!" />
         <ConnectedForm key="form" />
+        <ConnectedDefaults />
       </Provider>
     );
   }
@@ -162,7 +181,7 @@ tape("connect update", (assert: tape.Test) => {
 
   wrapper.unmount();
 
-  assert.equals(RENDER_CALLED, 4, "render should have been called");
+  assert.equals(RENDER_CALLED, 5, "render should have been called");
 
   assert.end();
 });
