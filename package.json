@@ -12,13 +12,13 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "ts-node node_modules/.bin/tape lib/**/*.test.{ts,tsx} | tap-spec",
-    "coverage": "nyc --reporter=lcov --require ts-node/register tape lib/**/*.test.{ts,tsx} | tap-spec; nyc report ---reporter=text",
+    "test": "ts-node node_modules/.bin/tape src/**/*.test.{ts,tsx} | tap-spec",
+    "coverage": "nyc --reporter=lcov --require ts-node/register tape src/**/*.test.{ts,tsx} | tap-spec; nyc report ---reporter=text",
     "clean": "rm -rf ./src",
     "formatTS": "prettier-tslint fix '**/*.{ts,tsx}'",
     "formatJS": "prettier --write '**/*.{js,jsx,json}' --ignore-path .gitignore",
     "format": "npm run formatTS && npm run formatJS",
-    "lint": "tslint -c tslint.json 'lib/**/*.{ts,tsx}' -e 'lib/**/*.test.*'",
+    "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}' -e 'src/**/*.test.*'",
     "todolist-connect": "parcel examples/todolist-connect/index.html",
     "todolist-hooks": "parcel examples/todolist-hooks/index.html"
   },

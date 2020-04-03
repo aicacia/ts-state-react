@@ -1,5 +1,5 @@
 import { State } from "@aicacia/state";
-import { createHook } from "../../../lib";
+import { createHook } from "../../../src";
 import { INITIAL_STATE as todos } from "./stores/todos/definitions";
 
 export const state = new State({
