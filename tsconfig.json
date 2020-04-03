@@ -4,10 +4,10 @@
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
-    "outDir": "./src",
+    "outDir": "./lib",
     "strict": true,
     "lib": ["es2018", "dom"]
   },
-  "include": ["lib"],
+  "include": ["src"],
   "exclude": ["**/*.test.*"]
 }

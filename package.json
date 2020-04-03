@@ -6,9 +6,9 @@
     "type": "git",
     "url": "https://gitlab.com/aicacia/libs/ts-state-react.git"
   },
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
-  "module": "./lib/index.ts",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "module": "./src/index.ts",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run clean && npm run build",
@@ -32,12 +32,12 @@
   "devDependencies": {
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
-    "@types/jsdom": "^16.2.0",
+    "@types/jsdom": "^11.0.6",
     "@types/react": "^16.9.32",
     "@types/tape": "^4.2.34",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
-    "jsdom": "^16.2.2",
+    "jsdom": "^11.0.6",
     "nyc": "^15.0.1",
     "parcel-bundler": "^1.12.4",
     "prettier": "^2.0.2",
@@ -61,7 +61,7 @@
   },
   "nyc": {
     "include": [
-      "lib/**/*"
+      "src/**/*"
     ],
     "exclude": [
       "**/*.test.*"
