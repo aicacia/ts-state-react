@@ -1,6 +1,7 @@
 import { State } from "@aicacia/state";
 import * as Enzyme from "enzyme";
 import * as EnzymeAdapter from "enzyme-adapter-react-16";
+// @ts-ignore
 import { JSDOM } from "jsdom";
 import * as React from "react";
 import * as tape from "tape";
