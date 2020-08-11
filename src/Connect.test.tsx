@@ -26,23 +26,23 @@ let RENDER_CALLED = 0;
 
 Enzyme.configure({ adapter: new EnzymeAdapter() });
 
-interface IDefaultsProps { }
+type IDefaultsProps = Record<string, unknown>;
 
-var DefaultsImpl = (function () {
+const DefaultsImpl = (function () {
   return () => {
     RENDER_CALLED += 1;
+    return <div>Defaults</div>;
+  };
+})();
 
-    return (
-      <div>Defaults</div>
-    );
-  }
-}());
+type IDefaultsOwnProps = Record<string, unknown>;
+type IDefaultsFunctionProps = Record<string, unknown>;
 
-interface IDefaultsOwnProps { }
-
-const ConnectedDefaults = connect<IDefaultsProps, {}, IDefaultsOwnProps>(
-  (state: IState, props: IDefaultsOwnProps) => ({})
-)(DefaultsImpl);
+const ConnectedDefaults = connect<
+  IDefaultsProps,
+  IDefaultsFunctionProps,
+  IDefaultsOwnProps
+>((_state: IState, _props: IDefaultsOwnProps) => ({}))(DefaultsImpl);
 
 interface ITextProps {
   text: string;
@@ -68,10 +68,12 @@ interface ITextOwnProps {
   symbol: string;
 }
 
-const ConnectedText = connect<ITextProps, {}, ITextOwnProps>(
+type ITextFunctionProps = Record<string, unknown>;
+
+const ConnectedText = connect<ITextProps, ITextFunctionProps, ITextOwnProps>(
   (state: IState, props: ITextOwnProps) => ({
     text: selectText(state),
-    symbol: props.symbol
+    symbol: props.symbol,
   })
 )(TextImpl);
 
@@ -92,28 +94,30 @@ class Form extends React.PureComponent<IFormProps> {
 
 const ConnectedForm = connect(
   (state: IState) => ({
-    text: state.get("form").text
+    text: state.get("form").text,
   }),
   () => ({
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
       formStore.setState({ text: e.target.value });
-    }
+    },
   })
 )(Form);
+
+type IRootProps = Record<string, unknown>;
 
 interface IRootState {
   value: IState;
 }
 
-class Root extends React.Component<{}, IRootState> {
-  constructor(props: {}) {
+class Root extends React.Component<IRootProps, IRootState> {
+  constructor(props: IRootProps) {
     super(props);
 
     this.state = {
-      value: state.getState()
+      value: state.getState(),
     };
 
-    state.on("set-state", value => {
+    state.on("set-state", (value) => {
       this.setState({ value });
     });
   }

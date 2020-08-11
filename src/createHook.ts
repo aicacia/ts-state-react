@@ -4,7 +4,11 @@ import { IMapStateToProps } from "./IMapStateToProps";
 import { returnsEmptyObject } from "./returnsEmptyObject";
 
 export const createUseState = <TState>(Context: React.Context<TState>) => {
-  const useState = <TStateProps, TFunctionProps, TOwnProps = {}>(
+  const useState = <
+    TStateProps,
+    TFunctionProps,
+    TOwnProps = Record<string, unknown>
+  >(
     mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>,
     mapStateToFunctions: IMapStateToFunctions<
       TState,

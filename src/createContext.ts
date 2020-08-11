@@ -36,20 +36,24 @@ export class Connect<
       ownProps,
       stateProps,
       functionProps,
-      Component
+      Component,
     } = this.props;
 
     return React.createElement(Component as any, {
       ref: componentRef,
       ...ownProps,
       ...stateProps,
-      ...functionProps
+      ...functionProps,
     });
   }
 }
 
 export const createConnect = <TState>(Context: React.Context<TState>) => {
-  const connect = <TStateProps = {}, TFunctionProps = {}, TOwnProps = {}>(
+  const connect = <
+    TStateProps = Record<string, unknown>,
+    TFunctionProps = Record<string, unknown>,
+    TOwnProps = Record<string, unknown>
+  >(
     mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>,
     mapStateToFunctions: IMapStateToFunctions<
       TState,
@@ -61,9 +65,9 @@ export const createConnect = <TState>(Context: React.Context<TState>) => {
     Component: React.ComponentType<TOwnProps & TStateProps & TFunctionProps>
   ): React.ComponentClass<TOwnProps> => {
     return class Connected extends React.PureComponent<TOwnProps> {
-      static displayName = `Connect(${Component.displayName ||
-        Component.name ||
-        "Component"})`;
+      static displayName = `Connect(${
+        Component.displayName || Component.name || "Component"
+      })`;
 
       componentRef: React.RefObject<
         React.ComponentType<TOwnProps & TStateProps & TFunctionProps>
@@ -86,14 +90,12 @@ export const createConnect = <TState>(Context: React.Context<TState>) => {
           Component,
           ownProps,
           stateProps,
-          functionProps
+          functionProps,
         });
       };
 
       render() {
-        return React.createElement(Context.Consumer, {
-          children: this.consumerRender
-        });
+        return React.createElement(Context.Consumer, null, this.consumerRender);
       }
     };
   };

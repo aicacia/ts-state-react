@@ -30,20 +30,16 @@ interface IDefaultsStateProps {}
 interface IDefaultsOwnProps {}
 
 const DefaultsMapStateToProps = (
-  state: IState,
-  ownProps: IDefaultsOwnProps
+  _state: IState,
+  _ownProps: IDefaultsOwnProps
 ): IDefaultsStateProps => ({});
 
 const Defaults = () => {
-  useState(
-    DefaultsMapStateToProps
-  );
+  useState(DefaultsMapStateToProps);
 
   RENDER_CALLED += 1;
 
-  return (
-    <div>Defaults</div>
-  );
+  return <div>Defaults</div>;
 };
 
 interface ITextStateProps {
@@ -62,16 +58,16 @@ const TextMapStateToProps = (
   ownProps: ITextOwnProps
 ): ITextStateProps => ({
   text: selectText(state),
-  symbol: ownProps.symbol
+  symbol: ownProps.symbol,
 });
 const TextMapStateToFunctions = (
-  state: IState,
-  ownProps: ITextOwnProps,
-  stateProps: ITextStateProps
+  _state: IState,
+  _ownProps: ITextOwnProps,
+  _stateProps: ITextStateProps
 ): ITextFunctionProps => ({});
 
 const Text = (ownProps: ITextOwnProps) => {
-  const props = useState(
+  const useStateProps = useState(
     TextMapStateToProps,
     TextMapStateToFunctions,
     ownProps
@@ -81,8 +77,8 @@ const Text = (ownProps: ITextOwnProps) => {
 
   return (
     <p id="text">
-      {props.text}
-      {props.symbol}
+      {useStateProps.text}
+      {useStateProps.symbol}
     </p>
   );
 };
@@ -97,18 +93,18 @@ interface IFormOwnProps {}
 
 const FormMapStateToProps = (
   state: IState,
-  ownProps: IFormOwnProps
+  _ownProps: IFormOwnProps
 ): IFormStateProps => ({
-  text: state.get("form").text
+  text: state.get("form").text,
 });
 const FormMapStateToFunctions = (): IFormFunctionProps => ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
     formStore.setState({ text: e.target.value });
-  }
+  },
 });
 
 const Form = (ownProps: IFormOwnProps) => {
-  const props = useState(
+  const useStateProps = useState(
     FormMapStateToProps,
     FormMapStateToFunctions,
     ownProps
@@ -119,9 +115,9 @@ const Form = (ownProps: IFormOwnProps) => {
   return (
     <input
       id="input"
-      onChange={props.onChange}
+      onChange={useStateProps.onChange}
       type="text"
-      value={props.text}
+      value={useStateProps.text}
     />
   );
 };
@@ -130,15 +126,15 @@ interface IRootState {
   value: IState;
 }
 
-class Root extends React.Component<{}, IRootState> {
-  constructor(props: {}) {
+class Root extends React.Component<Record<string, unknown>, IRootState> {
+  constructor(props: Record<string, unknown>) {
     super(props);
 
     this.state = {
-      value: state.getState()
+      value: state.getState(),
     };
 
-    state.on("set-state", value => {
+    state.on("set-state", (value) => {
       this.setState({ value });
     });
   }
@@ -148,7 +144,7 @@ class Root extends React.Component<{}, IRootState> {
       <Provider value={this.state.value}>
         <Text symbol="!" />
         <Form />
-        <Defaults/>
+        <Defaults />
       </Provider>
     );
   }
