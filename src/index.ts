@@ -1,4 +1,11 @@
-export { IConnectProps, Connect, createConnect, createContext } from "./createContext";
+export type { IConnectProps } from "./createContext";
+export { Connect, createConnect, createContext } from "./createContext";
 export { createUseState, createHook } from "./createHook";
-export { IMapStateToProps } from "./IMapStateToProps";
-export { IMapStateToFunctions } from "./IMapStateToFunctions";
+export {
+  createStateProvider,
+  IStateProviderProps,
+  IStateProviderState,
+  IStateProviderComponentClass,
+} from "./createStateProvider";
+export type { IMapStateToProps } from "./IMapStateToProps";
+export type { IMapStateToFunctions } from "./IMapStateToFunctions";

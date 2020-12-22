@@ -1,39 +1,37 @@
-import { State } from "@aicacia/state";
-import * as Enzyme from "enzyme";
-import * as EnzymeAdapter from "enzyme-adapter-react-16";
-// @ts-ignore
+import { State, IStateTypeOf } from "@aicacia/state";
+import { render } from "@testing-library/react";
+import { Simulate } from "react-dom/test-utils";
 import { JSDOM } from "jsdom";
-import * as React from "react";
+import { PureComponent } from "react";
 import * as tape from "tape";
-import { createContext } from "./createContext";
+import { Record as ImmutableRecord } from "immutable";
+import { createContext, createStateProvider } from ".";
 
-const dom = new JSDOM("<!doctype html><html><body></body></html>");
+const dom = new JSDOM();
 
-(global as any).document = dom.window.document;
 (global as any).window = dom.window;
+(global as any).document = dom.window.document;
 
-const INITIAL_STATE = { form: { text: "" } },
-  state = new State(INITIAL_STATE),
-  formStore = state.getStore("form");
+const FormState = ImmutableRecord({
+  text: "",
+});
 
-type IState = ReturnType<typeof state.getState>;
+const AppState = ImmutableRecord({
+  form: FormState(),
+});
 
-const { connect, Provider } = createContext(state.getState());
+const state = new State(AppState()),
+  formView = state.getView("form");
+
+type IState = IStateTypeOf<typeof state>;
+
+const { connect, Provider } = createContext(state.getCurrent());
 
 const selectText = (state: IState) => state.get("form").text;
 
-let RENDER_CALLED = 0;
-
-Enzyme.configure({ adapter: new EnzymeAdapter() });
-
 type IDefaultsProps = Record<string, unknown>;
 
-const DefaultsImpl = (function () {
-  return () => {
-    RENDER_CALLED += 1;
-    return <div>Defaults</div>;
-  };
-})();
+const DefaultsImpl = (() => () => <div>Defaults</div>)();
 
 type IDefaultsOwnProps = Record<string, unknown>;
 type IDefaultsFunctionProps = Record<string, unknown>;
@@ -49,14 +47,12 @@ interface ITextProps {
   symbol: string;
 }
 
-class TextImpl extends React.PureComponent<ITextProps> {
+class TextImpl extends PureComponent<ITextProps> {
   render() {
     const { text, symbol } = this.props;
 
-    RENDER_CALLED += 1;
-
     return (
-      <p id="text">
+      <p data-testid="text">
         {text}
         {symbol}
       </p>
@@ -82,13 +78,13 @@ interface IFormProps {
   onChange(e: React.ChangeEvent<HTMLInputElement>): void;
 }
 
-class Form extends React.PureComponent<IFormProps> {
+class Form extends PureComponent<IFormProps> {
   render() {
     const { text, onChange } = this.props;
 
-    RENDER_CALLED += 1;
-
-    return <input id="input" onChange={onChange} type="text" value={text} />;
+    return (
+      <input data-testid="input" onChange={onChange} type="text" value={text} />
+    );
   }
 }
 
@@ -98,95 +94,75 @@ const ConnectedForm = connect(
   }),
   () => ({
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      formStore.setState({ text: e.target.value });
+      formView.update((state) => state.set("text", e.target.value));
     },
   })
 )(Form);
 
-type IRootProps = Record<string, unknown>;
+const App = createStateProvider(state, Provider, false);
 
-interface IRootState {
-  value: IState;
-}
+tape("connect update", async (assert: tape.Test) => {
+  const wrapper = render(
+    <App>
+      <ConnectedText key="text" symbol="!" />
+      <ConnectedForm key="form" />
+      <ConnectedDefaults />
+    </App>
+  );
 
-class Root extends React.Component<IRootProps, IRootState> {
-  constructor(props: IRootProps) {
-    super(props);
-
-    this.state = {
-      value: state.getState(),
-    };
-
-    state.on("set-state", (value) => {
-      this.setState({ value });
-    });
-  }
-
-  render() {
-    return (
-      <Provider value={this.state.value}>
-        <ConnectedText key="text" symbol="!" />
-        <ConnectedForm key="form" />
-        <ConnectedDefaults />
-      </Provider>
-    );
-  }
-}
-
-tape("connect update", (assert: tape.Test) => {
-  const wrapper = Enzyme.mount(<Root />);
-
-  assert.equals(formStore.getState().text, "", "store text should be empty");
+  assert.equals(formView.getCurrent().text, "", "store text should be empty");
   assert.equals(
-    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    (wrapper.getByTestId("input") as HTMLInputElement).value,
     "",
     "input value should reflect stores"
   );
   assert.equals(
-    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    (wrapper.getByTestId("text") as HTMLParagraphElement).textContent,
     "!",
     "text value should reflect stores"
   );
 
-  wrapper.find("#input").simulate("change", { target: { value: "text" } });
+  Simulate.change(wrapper.getByTestId("input"), {
+    target: { value: "text" } as any,
+  });
 
   assert.equals(
-    formStore.getState().text,
+    formView.getCurrent().text,
     "text",
     "store's value should update"
   );
   assert.equals(
-    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    (wrapper.getByTestId("input") as HTMLInputElement).value,
     "text",
     "input value should update to new store's value"
   );
   assert.equals(
-    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    (wrapper.getByTestId("text") as HTMLParagraphElement).textContent,
     "text!",
     "text value should update to new store's value"
   );
 
-  wrapper.find("#input").simulate("change", { target: { value: "text" } });
+  Simulate.change(wrapper.getByTestId("input"), {
+    target: { value: "text" } as any,
+  });
 
   assert.equals(
-    formStore.getState().text,
+    formView.getCurrent().text,
     "text",
     "store's text should not have changed"
   );
   assert.equals(
-    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    (wrapper.getByTestId("input") as HTMLInputElement).value,
     "text",
     "input value should not have changed"
   );
   assert.equals(
-    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    (wrapper.getByTestId("text") as HTMLParagraphElement).textContent,
     "text!",
     "text value should not have changed"
   );
 
   wrapper.unmount();
-
-  assert.equals(RENDER_CALLED, 5, "render should have been called");
 
   assert.end();
 });

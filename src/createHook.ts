@@ -1,24 +1,27 @@
-import * as React from "react";
-import { IMapStateToFunctions } from "./IMapStateToFunctions";
-import { IMapStateToProps } from "./IMapStateToProps";
+import { RecordOf } from "immutable";
+import { Context, useContext, createContext } from "react";
+import type { IMapStateToFunctions } from "./IMapStateToFunctions";
+import type { IMapStateToProps } from "./IMapStateToProps";
 import { returnsEmptyObject } from "./returnsEmptyObject";
 
-export const createUseState = <TState>(Context: React.Context<TState>) => {
+export const createUseState = <T extends RecordOf<any>>(
+  Context: Context<T>
+) => {
   const useState = <
-    TStateProps,
+    TProps,
     TFunctionProps,
     TOwnProps = Record<string, unknown>
   >(
-    mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>,
+    mapStateToProps: IMapStateToProps<T, TProps, TOwnProps>,
     mapStateToFunctions: IMapStateToFunctions<
-      TState,
-      TStateProps,
+      T,
+      TProps,
       TFunctionProps,
       TOwnProps
     > = returnsEmptyObject as any,
     ownProps: TOwnProps = {} as any
   ) => {
-    const state = React.useContext(Context),
+    const state = useContext(Context),
       stateProps = mapStateToProps(state, ownProps),
       functionProps = mapStateToFunctions(state, ownProps, stateProps);
 
@@ -28,8 +31,8 @@ export const createUseState = <TState>(Context: React.Context<TState>) => {
   return useState;
 };
 
-export const createHook = <TState>(initialState: TState) => {
-  const Context = React.createContext(initialState),
+export const createHook = <T extends RecordOf<any>>(initialState: T) => {
+  const Context = createContext(initialState),
     { Provider, Consumer } = Context,
     useState = createUseState(Context);
 

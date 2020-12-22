@@ -1,24 +1,28 @@
-import * as React from "react";
+import { RecordOf } from "immutable";
+import {
+  Component,
+  createElement,
+  Context,
+  ComponentClass,
+  ComponentType,
+  PureComponent,
+  createContext as reactCreateContext,
+} from "react";
 import { shallowEqual } from "shallow-equal-object";
-import { IMapStateToFunctions } from "./IMapStateToFunctions";
-import { IMapStateToProps } from "./IMapStateToProps";
+import type { IMapStateToFunctions } from "./IMapStateToFunctions";
+import type { IMapStateToProps } from "./IMapStateToProps";
 import { returnsEmptyObject } from "./returnsEmptyObject";
 
 export interface IConnectProps<StateProps, FunctionProps, OwnProps> {
-  componentRef: React.RefObject<
-    React.ComponentType<OwnProps & StateProps & FunctionProps>
-  >;
   ownProps: OwnProps;
   stateProps: StateProps;
   functionProps: FunctionProps;
-  Component: React.ComponentType<OwnProps & StateProps & FunctionProps>;
+  Component: ComponentType<OwnProps & StateProps & FunctionProps>;
 }
 
-export class Connect<
-  StateProps,
-  FunctionProps,
-  OwnProps
-> extends React.Component<IConnectProps<StateProps, FunctionProps, OwnProps>> {
+export class Connect<StateProps, FunctionProps, OwnProps> extends Component<
+  IConnectProps<StateProps, FunctionProps, OwnProps>
+> {
   constructor(props: IConnectProps<StateProps, FunctionProps, OwnProps>) {
     super(props);
   }
@@ -31,16 +35,9 @@ export class Connect<
     );
   }
   render() {
-    const {
-      componentRef,
-      ownProps,
-      stateProps,
-      functionProps,
-      Component,
-    } = this.props;
+    const { ownProps, stateProps, functionProps, Component } = this.props;
 
-    return React.createElement(Component as any, {
-      ref: componentRef,
+    return createElement(Component as any, {
       ...ownProps,
       ...stateProps,
       ...functionProps,
@@ -48,45 +45,37 @@ export class Connect<
   }
 }
 
-export const createConnect = <TState>(Context: React.Context<TState>) => {
+export const createConnect = <T extends RecordOf<any>>(Context: Context<T>) => {
   const connect = <
-    TStateProps = Record<string, unknown>,
+    TProps = Record<string, unknown>,
     TFunctionProps = Record<string, unknown>,
     TOwnProps = Record<string, unknown>
   >(
-    mapStateToProps: IMapStateToProps<TState, TStateProps, TOwnProps>,
+    mapStateToProps: IMapStateToProps<T, TProps, TOwnProps>,
     mapStateToFunctions: IMapStateToFunctions<
-      TState,
-      TStateProps,
+      T,
+      TProps,
       TFunctionProps,
       TOwnProps
     > = returnsEmptyObject as any
   ) => (
-    Component: React.ComponentType<TOwnProps & TStateProps & TFunctionProps>
-  ): React.ComponentClass<TOwnProps> => {
-    return class Connected extends React.PureComponent<TOwnProps> {
+    Component: ComponentType<TOwnProps & TProps & TFunctionProps>
+  ): ComponentClass<TOwnProps> => {
+    return class Connected extends PureComponent<TOwnProps> {
       static displayName = `Connect(${
         Component.displayName || Component.name || "Component"
       })`;
 
-      componentRef: React.RefObject<
-        React.ComponentType<TOwnProps & TStateProps & TFunctionProps>
-      >;
-
       constructor(props: TOwnProps) {
         super(props);
-
-        this.componentRef = React.createRef();
       }
 
-      consumerRender = (state: TState) => {
-        const componentRef = this.componentRef,
-          ownProps = this.props,
+      consumerRender = (state: T) => {
+        const ownProps = this.props,
           stateProps = mapStateToProps(state, ownProps),
           functionProps = mapStateToFunctions(state, ownProps, stateProps);
 
-        return React.createElement(Connect as any, {
-          componentRef,
+        return createElement(Connect as any, {
           Component,
           ownProps,
           stateProps,
@@ -95,7 +84,7 @@ export const createConnect = <TState>(Context: React.Context<TState>) => {
       };
 
       render() {
-        return React.createElement(Context.Consumer, null, this.consumerRender);
+        return createElement(Context.Consumer, null, this.consumerRender);
       }
     };
   };
@@ -103,8 +92,8 @@ export const createConnect = <TState>(Context: React.Context<TState>) => {
   return connect;
 };
 
-export const createContext = <TState>(initialState: TState) => {
-  const Context = React.createContext(initialState),
+export const createContext = <T extends RecordOf<any>>(initialState: T) => {
+  const Context = reactCreateContext(initialState),
     { Provider, Consumer } = Context,
     connect = createConnect(Context);
 

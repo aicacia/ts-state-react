@@ -1,30 +1,32 @@
-import { State } from "@aicacia/state";
-import * as Enzyme from "enzyme";
-import * as EnzymeAdapter from "enzyme-adapter-react-16";
-// @ts-ignore
+import { State, IStateTypeOf } from "@aicacia/state";
+import { render } from "@testing-library/react";
+import { Simulate } from "react-dom/test-utils";
 import { JSDOM } from "jsdom";
-import * as React from "react";
 import * as tape from "tape";
-import { createHook } from "./createHook";
+import { Record as ImmutableRecord } from "immutable";
+import { createHook, createStateProvider } from ".";
 
-const dom = new JSDOM("<!doctype html><html><body></body></html>");
+const dom = new JSDOM();
 
-(global as any).document = dom.window.document;
 (global as any).window = dom.window;
+(global as any).document = dom.window.document;
 
-const INITIAL_STATE = { form: { text: "" } },
-  state = new State(INITIAL_STATE),
-  formStore = state.getStore("form");
+const FormState = ImmutableRecord({
+  text: "",
+});
 
-type IState = ReturnType<typeof state.getState>;
+const AppState = ImmutableRecord({
+  form: FormState(),
+});
 
-const { useState, Provider } = createHook(state.getState());
+const state = new State(AppState()),
+  formView = state.getView("form");
+
+type IState = IStateTypeOf<typeof state>;
+
+const { useState, Provider } = createHook(state.getCurrent());
 
 const selectText = (state: IState) => state.get("form").text;
-
-let RENDER_CALLED = 0;
-
-Enzyme.configure({ adapter: new EnzymeAdapter() });
 
 interface IDefaultsStateProps {}
 interface IDefaultsOwnProps {}
@@ -36,8 +38,6 @@ const DefaultsMapStateToProps = (
 
 const Defaults = () => {
   useState(DefaultsMapStateToProps);
-
-  RENDER_CALLED += 1;
 
   return <div>Defaults</div>;
 };
@@ -73,10 +73,8 @@ const Text = (ownProps: ITextOwnProps) => {
     ownProps
   );
 
-  RENDER_CALLED += 1;
-
   return (
-    <p id="text">
+    <p data-testid="text">
       {useStateProps.text}
       {useStateProps.symbol}
     </p>
@@ -99,7 +97,7 @@ const FormMapStateToProps = (
 });
 const FormMapStateToFunctions = (): IFormFunctionProps => ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-    formStore.setState({ text: e.target.value });
+    formView.update((state) => state.set("text", e.target.value));
   },
 });
 
@@ -110,11 +108,9 @@ const Form = (ownProps: IFormOwnProps) => {
     ownProps
   );
 
-  RENDER_CALLED += 1;
-
   return (
     <input
-      id="input"
+      data-testid="input"
       onChange={useStateProps.onChange}
       type="text"
       value={useStateProps.text}
@@ -122,88 +118,70 @@ const Form = (ownProps: IFormOwnProps) => {
   );
 };
 
-interface IRootState {
-  value: IState;
-}
+const App = createStateProvider(state, Provider, false);
 
-class Root extends React.Component<Record<string, unknown>, IRootState> {
-  constructor(props: Record<string, unknown>) {
-    super(props);
+tape("hook update", async (assert: tape.Test) => {
+  const wrapper = render(
+    <App>
+      <Text symbol="!" />
+      <Form />
+      <Defaults />
+    </App>
+  );
 
-    this.state = {
-      value: state.getState(),
-    };
-
-    state.on("set-state", (value) => {
-      this.setState({ value });
-    });
-  }
-
-  render() {
-    return (
-      <Provider value={this.state.value}>
-        <Text symbol="!" />
-        <Form />
-        <Defaults />
-      </Provider>
-    );
-  }
-}
-
-tape("hook update", (assert: tape.Test) => {
-  const wrapper = Enzyme.mount(<Root />);
-
-  assert.equals(formStore.getState().text, "", "store text should be empty");
+  assert.equals(formView.getCurrent().text, "", "store text should be empty");
   assert.equals(
-    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    (wrapper.getByTestId("input") as HTMLInputElement).value,
     "",
-    "input element should reflect stores"
+    "input value should reflect stores"
   );
   assert.equals(
-    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    (wrapper.getByTestId("text") as HTMLParagraphElement).textContent,
     "!",
-    "text element should reflect stores"
+    "text value should reflect stores"
   );
 
-  wrapper.find("#input").simulate("change", { target: { value: "text" } });
+  Simulate.change(wrapper.getByTestId("input"), {
+    target: { value: "text" } as any,
+  });
 
   assert.equals(
-    formStore.getState().text,
+    formView.getCurrent().text,
     "text",
     "store's value should update"
   );
   assert.equals(
-    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    (wrapper.getByTestId("input") as HTMLInputElement).value,
     "text",
     "input value should update to new store's value"
   );
   assert.equals(
-    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    (wrapper.getByTestId("text") as HTMLParagraphElement).textContent,
     "text!",
     "text value should update to new store's value"
   );
 
-  wrapper.find("#input").simulate("change", { target: { value: "text" } });
+  Simulate.change(wrapper.getByTestId("input"), {
+    target: { value: "text" } as any,
+  });
 
   assert.equals(
-    formStore.getState().text,
+    formView.getCurrent().text,
     "text",
     "store's text should not have changed"
   );
   assert.equals(
-    (wrapper.find("#input").getDOMNode() as HTMLInputElement).value,
+    (wrapper.getByTestId("input") as HTMLInputElement).value,
     "text",
     "input value should not have changed"
   );
   assert.equals(
-    (wrapper.find("#text").getDOMNode() as HTMLParagraphElement).textContent,
+    (wrapper.getByTestId("text") as HTMLParagraphElement).textContent,
     "text!",
     "text value should not have changed"
   );
 
   wrapper.unmount();
-
-  assert.equals(RENDER_CALLED, 9, "render should have been called");
 
   assert.end();
 });

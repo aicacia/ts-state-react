@@ -1,18 +1,19 @@
-import * as React from "react";
-import { connect, IState } from "../state";
+import { PureComponent, ChangeEvent, FormEvent } from "react";
+import { connect, IState } from "../connect";
 import {
   create,
   ITodo,
   remove,
   selectAll,
   selectText,
-  setText
-} from "../stores/todos";
-import { Todo } from "./Todo";
+  setText,
+} from "../../../shared/stores/todos";
+import { Todo } from "../../../shared/components/Todo";
+import { List, RecordOf } from "immutable";
 
 export interface ITodoListStateProps {
   text: string;
-  list: ITodo[];
+  list: List<RecordOf<ITodo>>;
 }
 export interface ITodoListFunctionProps {}
 export interface ITodoListProps
@@ -24,16 +25,16 @@ export interface ITodoListContainerProps {}
 
 const mapStateToProps = (
   state: IState,
-  ownProps: ITodoListProps
+  _ownProps: ITodoListProps
 ): ITodoListStateProps => ({
   text: selectText(state),
-  list: selectAll(state)
+  list: selectAll(state),
 });
 
 const mapStateToFunctions = (
-  state: IState,
-  ownProps: ITodoListProps,
-  stateProps: ITodoListStateProps
+  _state: IState,
+  _ownProps: ITodoListProps,
+  _stateProps: ITodoListStateProps
 ): ITodoListFunctionProps => ({});
 
 export const TodoList = connect<
@@ -44,17 +45,14 @@ export const TodoList = connect<
   mapStateToProps,
   mapStateToFunctions
 )(
-  class TodoListImpl extends React.PureComponent<
-    ITodoListProps,
-    ITodoListState
-  > {
-    onSubmit = (e: React.FormEvent) => {
+  class TodoListImpl extends PureComponent<ITodoListProps, ITodoListState> {
+    onSubmit = (e: FormEvent) => {
       e.preventDefault();
 
       create(this.props.text);
       setText("");
     };
-    onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange = (e: ChangeEvent<HTMLInputElement>) => {
       setText(e.target.value);
     };
     createOnRemove = (id: number) => () => remove(id);
@@ -65,7 +63,7 @@ export const TodoList = connect<
             <input value={this.props.text} onChange={this.onChange} />
           </form>
           <ul>
-            {this.props.list.map(todo => (
+            {this.props.list.map((todo) => (
               <Todo
                 key={todo.id}
                 text={todo.text}
