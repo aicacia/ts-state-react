@@ -1,5 +1,4 @@
-import { State } from "@aicacia/state";
-import { RecordOf } from "immutable";
+import { IStateTypeOf, State } from "@aicacia/state";
 import {
   Component,
   Provider,
@@ -12,17 +11,18 @@ export interface IStateProviderProps {
   children: ReactNode;
 }
 
-export interface IStateProviderState<T extends RecordOf<any>> {
-  value: T;
+export interface IStateProviderState<T> {
+  value: IStateTypeOf<State<T>>;
 }
 
-export type IStateProviderComponentClass<
-  T extends RecordOf<any>
-> = ComponentClass<IStateProviderProps, IStateProviderState<T>>;
+export type IStateProviderComponentClass<T> = ComponentClass<
+  IStateProviderProps,
+  IStateProviderState<T>
+>;
 
-export function createStateProvider<T extends RecordOf<any>>(
+export function createStateProvider<T>(
   state: State<T>,
-  Provider: Provider<T>,
+  Provider: Provider<IStateTypeOf<State<T>>>,
   debounceUpdates = true
 ): IStateProviderComponentClass<T> {
   return class StateProvider extends Component<

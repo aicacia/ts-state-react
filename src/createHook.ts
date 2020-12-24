@@ -1,12 +1,9 @@
-import { RecordOf } from "immutable";
 import { Context, useContext, createContext } from "react";
 import type { IMapStateToFunctions } from "./IMapStateToFunctions";
 import type { IMapStateToProps } from "./IMapStateToProps";
 import { returnsEmptyObject } from "./returnsEmptyObject";
 
-export const createUseState = <T extends RecordOf<any>>(
-  Context: Context<T>
-) => {
+export const createUseState = <T>(Context: Context<T>) => {
   const useState = <
     TProps,
     TFunctionProps,
@@ -31,7 +28,7 @@ export const createUseState = <T extends RecordOf<any>>(
   return useState;
 };
 
-export const createHook = <T extends RecordOf<any>>(initialState: T) => {
+export const createHook = <T>(initialState: T) => {
   const Context = createContext(initialState),
     { Provider, Consumer } = Context,
     useState = createUseState(Context);

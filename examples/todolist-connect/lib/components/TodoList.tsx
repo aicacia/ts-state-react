@@ -1,13 +1,8 @@
 import { PureComponent, ChangeEvent, FormEvent } from "react";
 import { connect, IState } from "../connect";
-import {
-  create,
-  ITodo,
-  remove,
-  selectAll,
-  selectText,
-  setText,
-} from "../../../shared/stores/todos";
+import { create, remove, setText } from "../../../shared/stores/todos/actions";
+import { ITodo } from "../../../shared/stores/todos/definitions";
+import { selectText, selectAll } from "../../../shared/stores/todos/selectors";
 import { Todo } from "../../../shared/components/Todo";
 import { List, RecordOf } from "immutable";
 

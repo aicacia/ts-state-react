@@ -4,24 +4,36 @@ import { Simulate } from "react-dom/test-utils";
 import { JSDOM } from "jsdom";
 import { PureComponent } from "react";
 import * as tape from "tape";
-import { Record as ImmutableRecord } from "immutable";
+import { Record as ImmutableRecord, RecordOf } from "immutable";
 import { createContext, createStateProvider } from ".";
+import type { IJSONObject } from "@aicacia/json";
 
 const dom = new JSDOM();
 
 (global as any).window = dom.window;
 (global as any).document = dom.window.document;
 
-const FormState = ImmutableRecord({
+interface IFormState {
+  text: string;
+}
+
+const FormState = ImmutableRecord<IFormState>({
   text: "",
 });
 
-const AppState = ImmutableRecord({
-  form: FormState(),
-});
+function FormStateFromJSON(json: IJSONObject): RecordOf<IFormState> {
+  return FormState({ text: json.text as string });
+}
 
-const state = new State(AppState()),
-  formView = state.getView("form");
+const state = new State(
+    {
+      form: FormState(),
+    },
+    {
+      form: FormStateFromJSON,
+    }
+  ),
+  formStore = state.getStore("form");
 
 type IState = IStateTypeOf<typeof state>;
 
@@ -94,14 +106,14 @@ const ConnectedForm = connect(
   }),
   () => ({
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      formView.update((state) => state.set("text", e.target.value));
+      formStore.update((state) => state.set("text", e.target.value));
     },
   })
 )(Form);
 
 const App = createStateProvider(state, Provider, false);
 
-tape("connect update", async (assert: tape.Test) => {
+tape("connect update", (assert: tape.Test) => {
   const wrapper = render(
     <App>
       <ConnectedText key="text" symbol="!" />
@@ -110,7 +122,7 @@ tape("connect update", async (assert: tape.Test) => {
     </App>
   );
 
-  assert.equals(formView.getCurrent().text, "", "store text should be empty");
+  assert.equals(formStore.getCurrent().text, "", "store text should be empty");
   assert.equals(
     (wrapper.getByTestId("input") as HTMLInputElement).value,
     "",
@@ -127,7 +139,7 @@ tape("connect update", async (assert: tape.Test) => {
   });
 
   assert.equals(
-    formView.getCurrent().text,
+    formStore.getCurrent().text,
     "text",
     "store's value should update"
   );
@@ -147,7 +159,7 @@ tape("connect update", async (assert: tape.Test) => {
   });
 
   assert.equals(
-    formView.getCurrent().text,
+    formStore.getCurrent().text,
     "text",
     "store's text should not have changed"
   );

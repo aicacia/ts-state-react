@@ -1,4 +1,3 @@
-import { RecordOf } from "immutable";
 import {
   Component,
   createElement,
@@ -45,7 +44,7 @@ export class Connect<StateProps, FunctionProps, OwnProps> extends Component<
   }
 }
 
-export const createConnect = <T extends RecordOf<any>>(Context: Context<T>) => {
+export const createConnect = <T>(Context: Context<T>) => {
   const connect = <
     TProps = Record<string, unknown>,
     TFunctionProps = Record<string, unknown>,
@@ -92,7 +91,7 @@ export const createConnect = <T extends RecordOf<any>>(Context: Context<T>) => {
   return connect;
 };
 
-export const createContext = <T extends RecordOf<any>>(initialState: T) => {
+export const createContext = <T>(initialState: T) => {
   const Context = reactCreateContext(initialState),
     { Provider, Consumer } = Context,
     connect = createConnect(Context);

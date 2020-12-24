@@ -1,7 +1,7 @@
 import { state } from "../../state";
 import { STORE_NAME, Todo } from "./definitions";
 
-export const store = state.getView(STORE_NAME);
+export const store = state.getStore(STORE_NAME);
 
 let ID = 0;
 
