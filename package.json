@@ -1,6 +1,6 @@
 {
   "name": "@aicacia/state-react",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "connect react components with @aicacia/state stores",
   "repository": {
     "type": "git",
@@ -27,41 +27,41 @@
   "license": "(MIT OR Apache-2.0)",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "@aicacia/json": "^0.1.6",
-    "@aicacia/state": "^0.2.5",
-    "@testing-library/react": "^11.2.2",
-    "@types/jsdom": "^16.2.5",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "@types/tape": "^4.13.0",
-    "@typescript-eslint/eslint-plugin": "^4.11.0",
-    "@typescript-eslint/parser": "^4.11.0",
-    "eslint": "^7.16.0",
-    "eslint-config-prettier": "^7.1.0",
-    "eslint-plugin-prettier": "^3.3.0",
-    "eslint-plugin-react": "^7.21.5",
+    "@aicacia/json": "0",
+    "@aicacia/state": "0",
+    "@testing-library/react": "11",
+    "@types/jsdom": "16",
+    "@types/react": "16 || 17",
+    "@types/react-dom": "16 || 17",
+    "@types/tape": "4",
+    "@typescript-eslint/eslint-plugin": "4",
+    "@typescript-eslint/parser": "4",
+    "eslint": "7",
+    "eslint-config-prettier": "7",
+    "eslint-plugin-prettier": "3",
+    "eslint-plugin-react": "7",
     "immutable": "^4.0.0-rc.12",
-    "jsdom": "^16.4.0",
-    "nyc": "^15.1.0",
-    "parcel-bundler": "^1.12.4",
-    "prettier": "^2.0.5",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "tap-nyc": "^1.0.3",
-    "tap-spec": "^5.0.0",
-    "tape": "^5.0.1",
-    "ts-node": "^9.1.1",
-    "tslib": "^2.0.3",
+    "jsdom": "16",
+    "nyc": "15",
+    "parcel-bundler": "1",
+    "prettier": "2",
+    "react": "16 || 17",
+    "react-dom": "16 || 17",
+    "tap-nyc": "1",
+    "tap-spec": "5",
+    "tape": "5",
+    "ts-node": "9",
+    "tslib": "2",
     "typedoc": "beta",
-    "typescript": "^4.1.3"
+    "typescript": "4"
   },
   "peerDependencies": {
-    "tslib": ">=2",
-    "@aicacia/state": ">=0.2",
-    "react": ">=16"
+    "tslib": "2",
+    "@aicacia/state": "0",
+    "react": "16 || 17"
   },
   "dependencies": {
-    "shallow-equal-object": "^1.1.1"
+    "shallow-equal-object": "1"
   },
   "nyc": {
     "include": [
