@@ -36,54 +36,24 @@ const state = new State(
 
 type IState = IStateTypeOf<typeof state>;
 
-const { useState, Provider } = createHook(state.getCurrent());
+const { useMapStateToProps, Provider } = createHook(state.getCurrent());
 
 const selectText = (state: IState) => state.get("form").text;
 
-interface IDefaultsStateProps {}
-interface IDefaultsOwnProps {}
-
-const DefaultsMapStateToProps = (
-  _state: IState,
-  _ownProps: IDefaultsOwnProps
-): IDefaultsStateProps => ({});
-
 const Defaults = () => {
-  useState(DefaultsMapStateToProps);
-
+  useMapStateToProps(() => ({}));
   return <div>Defaults</div>;
 };
-
-interface ITextStateProps {
-  text: string;
-  symbol: string;
-}
-
-interface ITextFunctionProps {}
 
 interface ITextOwnProps {
   symbol: string;
 }
 
-const TextMapStateToProps = (
-  state: IState,
-  ownProps: ITextOwnProps
-): ITextStateProps => ({
-  text: selectText(state),
-  symbol: ownProps.symbol,
-});
-const TextMapStateToFunctions = (
-  _state: IState,
-  _ownProps: ITextOwnProps,
-  _stateProps: ITextStateProps
-): ITextFunctionProps => ({});
-
-const Text = (ownProps: ITextOwnProps) => {
-  const useStateProps = useState(
-    TextMapStateToProps,
-    TextMapStateToFunctions,
-    ownProps
-  );
+function Text(ownProps: ITextOwnProps) {
+  const useStateProps = useMapStateToProps((state) => ({
+    text: selectText(state),
+    symbol: ownProps.symbol,
+  }));
 
   return (
     <p data-testid="text">
@@ -91,44 +61,26 @@ const Text = (ownProps: ITextOwnProps) => {
       {useStateProps.symbol}
     </p>
   );
-};
-
-interface IFormStateProps {
-  text: string;
 }
-interface IFormFunctionProps {
-  onChange(e: React.ChangeEvent<HTMLInputElement>): void;
-}
-interface IFormOwnProps {}
 
-const FormMapStateToProps = (
-  state: IState,
-  _ownProps: IFormOwnProps
-): IFormStateProps => ({
-  text: state.get("form").text,
-});
-const FormMapStateToFunctions = (): IFormFunctionProps => ({
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+function Form() {
+  const useStateProps = useMapStateToProps((state) => ({
+    text: state.get("form").text,
+  }));
+
+  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     formStore.update((state) => state.set("text", e.target.value));
-  },
-});
-
-const Form = (ownProps: IFormOwnProps) => {
-  const useStateProps = useState(
-    FormMapStateToProps,
-    FormMapStateToFunctions,
-    ownProps
-  );
+  }
 
   return (
     <input
       data-testid="input"
-      onChange={useStateProps.onChange}
+      onChange={onChange}
       type="text"
       value={useStateProps.text}
     />
   );
-};
+}
 
 const App = createStateProvider(state, Provider, false);
 

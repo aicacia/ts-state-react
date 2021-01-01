@@ -1,37 +1,29 @@
-import { Context, useContext, createContext } from "react";
-import type { IMapStateToFunctions } from "./IMapStateToFunctions";
-import type { IMapStateToProps } from "./IMapStateToProps";
-import { returnsEmptyObject } from "./returnsEmptyObject";
+import { Context, useContext, createContext, useState, useMemo } from "react";
+import { shallowEqual } from "shallow-equal-object";
 
-export const createUseState = <T>(Context: Context<T>) => {
-  const useState = <
-    TProps,
-    TFunctionProps,
-    TOwnProps = Record<string, unknown>
-  >(
-    mapStateToProps: IMapStateToProps<T, TProps, TOwnProps>,
-    mapStateToFunctions: IMapStateToFunctions<
-      T,
-      TProps,
-      TFunctionProps,
-      TOwnProps
-    > = returnsEmptyObject as any,
-    ownProps: TOwnProps = {} as any
-  ) => {
+export function createUseMapStateToProps<T>(Context: Context<T>) {
+  return function useMapStateToProps<TProps>(
+    mapStateToProps: (state: T) => TProps
+  ) {
     const state = useContext(Context),
-      stateProps = mapStateToProps(state, ownProps),
-      functionProps = mapStateToFunctions(state, ownProps, stateProps);
+      [props, setProps] = useState(() => mapStateToProps(state));
 
-    return { ...ownProps, ...stateProps, ...functionProps };
+    useMemo(() => {
+      const nextProps = mapStateToProps(state);
+
+      if (!shallowEqual(props, nextProps)) {
+        setProps(nextProps);
+      }
+    }, [state]);
+
+    return props;
   };
+}
 
-  return useState;
-};
-
-export const createHook = <T>(initialState: T) => {
+export function createHook<T>(initialState: T) {
   const Context = createContext(initialState),
     { Provider, Consumer } = Context,
-    useState = createUseState(Context);
+    useMapStateToProps = createUseMapStateToProps(Context);
 
-  return { useState, Context, Provider, Consumer };
-};
+  return { useMapStateToProps, Context, Provider, Consumer };
+}

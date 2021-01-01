@@ -1,6 +1,6 @@
 export type { IConnectProps } from "./createContext";
 export { Connect, createConnect, createContext } from "./createContext";
-export { createUseState, createHook } from "./createHook";
+export { createUseMapStateToProps, createHook } from "./createHook";
 export {
   createStateProvider,
   IStateProviderProps,

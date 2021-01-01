@@ -1,34 +1,14 @@
 import { ChangeEvent, FormEvent } from "react";
-import { IState, useState } from "../connect";
+import { useMapStateToProps } from "../connect";
 import { create, remove, setText } from "../../../shared/stores/todos/actions";
-import { ITodo } from "../../../shared/stores/todos/definitions";
 import { selectText, selectAll } from "../../../shared/stores/todos/selectors";
 import { Todo } from "../../../shared/components/Todo";
-import { List, RecordOf } from "immutable";
 
-interface ITodoListStateProps {
-  text: string;
-  list: List<RecordOf<ITodo>>;
-}
-interface ITodoListFunctionProps {}
-interface ITodoListProps {}
-
-const mapStateToProps = (
-  state: IState,
-  _ownProps: ITodoListProps
-): ITodoListStateProps => ({
-  text: selectText(state),
-  list: selectAll(state),
-});
-
-const mapStateToFunctions = (
-  _state: IState,
-  _ownProps: ITodoListProps,
-  _stateProps: ITodoListStateProps
-): ITodoListFunctionProps => ({});
-
-export const TodoList = (ownProps: ITodoListProps) => {
-  const props = useState(mapStateToProps, mapStateToFunctions, ownProps);
+export function TodoList() {
+  const props = useMapStateToProps((state) => ({
+    text: selectText(state),
+    list: selectAll(state),
+  }));
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -57,4 +37,4 @@ export const TodoList = (ownProps: ITodoListProps) => {
       </ul>
     </div>
   );
-};
+}
