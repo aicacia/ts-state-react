@@ -1,6 +1,6 @@
 {
   "name": "@aicacia/state-react",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "connect react components with @aicacia/state stores",
   "repository": {
     "type": "git",
@@ -63,9 +63,9 @@
     "typescript": "4"
   },
   "peerDependencies": {
-    "tslib": "2",
     "@aicacia/state": "0",
-    "react": "16 || 17"
+    "react": "16 || 17",
+    "tslib": "2"
   },
   "dependencies": {
     "shallow-equal-object": "1"

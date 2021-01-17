@@ -45,7 +45,7 @@ export function createStateProvider<T>(
         this._isUpdating = true;
 
         if (debounceUpdates) {
-          process.nextTick(this.runChange);
+          setTimeout(this.runChange, 0);
         } else {
           this.runChange();
         }
