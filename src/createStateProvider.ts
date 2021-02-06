@@ -55,7 +55,11 @@ export function createStateProvider<T>(
     runChange = () => {
       this._isUpdating = false;
       if (this._isMounted) {
-        this.setState({ value: state.getCurrent() });
+        const nextValue = state.getCurrent();
+
+        if (!this.state.value.equals(nextValue)) {
+          this.setState({ value: nextValue });
+        }
       }
     };
 
