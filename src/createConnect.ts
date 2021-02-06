@@ -1,11 +1,11 @@
+import { State } from "@aicacia/state";
+import { RecordOf } from "immutable";
 import {
   Component,
   createElement,
-  Context,
   ComponentClass,
   ComponentType,
   PureComponent,
-  createContext as reactCreateContext,
 } from "react";
 import { shallowEqual } from "shallow-equal-object";
 import type { IMapStateToFunctions } from "./IMapStateToFunctions";
@@ -44,15 +44,15 @@ export class Connect<StateProps, FunctionProps, OwnProps> extends Component<
   }
 }
 
-export const createConnect = <T>(Context: Context<T>) => {
+export function createConnect<T>(state: State<T>) {
   const connect = <
     TProps = Record<string, unknown>,
     TFunctionProps = Record<string, unknown>,
     TOwnProps = Record<string, unknown>
   >(
-    mapStateToProps: IMapStateToProps<T, TProps, TOwnProps>,
+    mapStateToProps: IMapStateToProps<RecordOf<T>, TProps, TOwnProps>,
     mapStateToFunctions: IMapStateToFunctions<
-      T,
+      RecordOf<T>,
       TProps,
       TFunctionProps,
       TOwnProps
@@ -60,19 +60,42 @@ export const createConnect = <T>(Context: Context<T>) => {
   ) => (
     Component: ComponentType<TOwnProps & TProps & TFunctionProps>
   ): ComponentClass<TOwnProps> => {
-    return class Connected extends PureComponent<TOwnProps> {
+    return class Connected extends PureComponent<
+      TOwnProps,
+      { value: RecordOf<T> }
+    > {
       static displayName = `Connect(${
         Component.displayName || Component.name || "Component"
       })`;
 
       constructor(props: TOwnProps) {
         super(props);
+
+        this.state = {
+          value: state.getCurrent(),
+        };
       }
 
-      consumerRender = (state: T) => {
+      onChange = () => {
+        this.setState({ value: state.getCurrent() });
+      };
+
+      componentDidMount() {
+        state.on("change", this.onChange);
+      }
+
+      componentWillUnmount() {
+        state.off("change", this.onChange);
+      }
+
+      render() {
         const ownProps = this.props,
-          stateProps = mapStateToProps(state, ownProps),
-          functionProps = mapStateToFunctions(state, ownProps, stateProps);
+          stateProps = mapStateToProps(this.state.value, ownProps),
+          functionProps = mapStateToFunctions(
+            this.state.value,
+            ownProps,
+            stateProps
+          );
 
         return createElement(Connect as any, {
           Component,
@@ -80,21 +103,9 @@ export const createConnect = <T>(Context: Context<T>) => {
           stateProps,
           functionProps,
         });
-      };
-
-      render() {
-        return createElement(Context.Consumer, null, this.consumerRender);
       }
     };
   };
 
   return connect;
-};
-
-export const createContext = <T>(initialState: T) => {
-  const Context = reactCreateContext(initialState),
-    { Provider, Consumer } = Context,
-    connect = createConnect(Context);
-
-  return { connect, Provider, Consumer, Context };
-};
+}

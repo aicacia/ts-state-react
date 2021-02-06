@@ -5,7 +5,7 @@ import { JSDOM } from "jsdom";
 import { PureComponent } from "react";
 import * as tape from "tape";
 import { Record as ImmutableRecord, RecordOf } from "immutable";
-import { createContext, createStateProvider } from ".";
+import { createConnect } from ".";
 import type { IJSONObject } from "@aicacia/json";
 
 const dom = new JSDOM();
@@ -37,7 +37,7 @@ const state = new State(
 
 type IState = IStateTypeOf<typeof state>;
 
-const { connect, Provider } = createContext(state.getCurrent());
+const connect = createConnect(state);
 
 const selectText = (state: IState) => state.get("form").text;
 
@@ -111,15 +111,13 @@ const ConnectedForm = connect(
   })
 )(Form);
 
-const App = createStateProvider(state, Provider, false);
-
 tape("connect update", (assert: tape.Test) => {
   const wrapper = render(
-    <App>
+    <>
       <ConnectedText key="text" symbol="!" />
       <ConnectedForm key="form" />
       <ConnectedDefaults />
-    </App>
+    </>
   );
 
   assert.equals(formStore.getCurrent().text, "", "store text should be empty");

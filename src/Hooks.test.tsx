@@ -4,7 +4,7 @@ import { Simulate } from "react-dom/test-utils";
 import { JSDOM } from "jsdom";
 import * as tape from "tape";
 import { Record as ImmutableRecord, RecordOf } from "immutable";
-import { createHook, createStateProvider } from ".";
+import { createHook } from ".";
 import { IJSONObject } from "@aicacia/json";
 
 const dom = new JSDOM();
@@ -36,9 +36,9 @@ const state = new State(
 
 type IState = IStateTypeOf<typeof state>;
 
-const { useMapStateToProps, Provider } = createHook(state.getCurrent());
+const useMapStateToProps = createHook(state);
 
-const selectText = (state: IState) => state.get("form").text;
+const selectText = (state: IState) => state.form.text;
 
 const Defaults = () => {
   useMapStateToProps(() => ({}));
@@ -65,7 +65,7 @@ function Text(ownProps: ITextOwnProps) {
 
 function Form() {
   const useStateProps = useMapStateToProps((state) => ({
-    text: state.get("form").text,
+    text: state.form.text,
   }));
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -82,15 +82,13 @@ function Form() {
   );
 }
 
-const App = createStateProvider(state, Provider, false);
-
 tape("hook update", async (assert: tape.Test) => {
   const wrapper = render(
-    <App>
+    <>
       <Text symbol="!" />
       <Form />
       <Defaults />
-    </App>
+    </>
   );
 
   assert.equals(formStore.getCurrent().text, "", "store text should be empty");

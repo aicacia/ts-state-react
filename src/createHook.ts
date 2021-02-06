@@ -1,29 +1,34 @@
-import { Context, useContext, createContext, useState, useMemo } from "react";
+import { State } from "@aicacia/state";
+import { RecordOf } from "immutable";
+import { useState, useEffect, useCallback } from "react";
 import { shallowEqual } from "shallow-equal-object";
 
-export function createUseMapStateToProps<T>(Context: Context<T>) {
+export function createUseMapStateToProps<T>(state: State<T>) {
   return function useMapStateToProps<TProps>(
-    mapStateToProps: (state: T) => TProps
+    mapStateToProps: (state: RecordOf<T>) => TProps
   ) {
-    const state = useContext(Context),
-      [props, setProps] = useState(mapStateToProps(state));
+    const [props, setProps] = useState(mapStateToProps(state.getCurrent()));
 
-    useMemo(() => {
-      const nextProps = mapStateToProps(state);
+    const onChange = useCallback(() => {
+      const nextProps = mapStateToProps(state.getCurrent());
 
       if (!shallowEqual(props, nextProps)) {
         setProps(nextProps);
       }
-    }, [state]);
+    }, [props]);
+
+    useEffect(() => {
+      state.on("change", onChange);
+
+      return () => {
+        state.off("change", onChange);
+      };
+    }, [state, onChange]);
 
     return props;
   };
 }
 
-export function createHook<T>(initialState: T) {
-  const Context = createContext(initialState),
-    { Provider, Consumer } = Context,
-    useMapStateToProps = createUseMapStateToProps(Context);
-
-  return { useMapStateToProps, Context, Provider, Consumer };
+export function createHook<T>(state: State<T>) {
+  return createUseMapStateToProps(state);
 }
