@@ -6,7 +6,7 @@ export function createUseMapStateToProps<T>(Context: Context<T>) {
     mapStateToProps: (state: T) => TProps
   ) {
     const state = useContext(Context),
-      [props, setProps] = useState(() => mapStateToProps(state));
+      [props, setProps] = useState(mapStateToProps(state));
 
     useMemo(() => {
       const nextProps = mapStateToProps(state);
