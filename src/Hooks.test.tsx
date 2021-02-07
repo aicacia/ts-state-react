@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import { Simulate } from "react-dom/test-utils";
 import { JSDOM } from "jsdom";
 import * as tape from "tape";
-import { Record as ImmutableRecord, RecordOf } from "immutable";
+import { Record as ImmutableRecord, Record, RecordOf } from "immutable";
 import { createHook } from ".";
 import { IJSONObject } from "@aicacia/json";
 
@@ -144,6 +144,59 @@ tape("hook update", async (assert: tape.Test) => {
   );
 
   wrapper.unmount();
+
+  assert.end();
+});
+
+tape("hook update", async (assert: tape.Test) => {
+  interface ICounter {
+    count: number;
+  }
+  const Counter = Record<ICounter>({
+    count: 0,
+  });
+  interface IName {
+    name: string;
+  }
+  const Name = Record<IName>({
+    name: "",
+  });
+  const state = new State(
+    {
+      counter: Counter(),
+      name: Name(),
+    },
+    {
+      counter: Counter,
+      name: Name,
+    }
+  );
+  const useMapStateToProps = createHook(state);
+  let rendered = 0;
+
+  function CounterComponent() {
+    const count = useMapStateToProps((state) => state.counter.count);
+    rendered += 1;
+    return <p data-testid="text">{count}</p>;
+  }
+
+  const wrapper = render(<CounterComponent />);
+
+  assert.equals(
+    (wrapper.getByTestId("text") as HTMLParagraphElement).textContent,
+    state.getStore("counter").getCurrent().count.toString(),
+    "text value should reflect stores"
+  );
+
+  state
+    .getStore("counter")
+    .update((state) => state.update("count", (count) => count + 1));
+
+  assert.equals(rendered, 2, "should rerender");
+
+  state.getStore("name").update((state) => state.set("name", "test"));
+
+  assert.equals(rendered, 2, "should not rerender");
 
   assert.end();
 });
